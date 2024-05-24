@@ -105,7 +105,6 @@
                     anchor: 'bottom',
                     rotation: { x: 90, y: 90, z: 0 },
                 }, async obj => {
-                    console.log(obj);
                     obj.setCoords([2.3522, 48.8566]);
                     threebox.add(obj);
                     $mapStore.flyTo({
@@ -128,7 +127,6 @@
                         });
                         // Rotation is in radians
                         $mapStore.setBearing(-e.detail.action.rotation!.z * 180 / Math.PI + 190);
-                        console.log(e);
                     });
                 })
             },
