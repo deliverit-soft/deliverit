@@ -576,7 +576,7 @@ declare module 'threebox-plugin' {
     }
 
     export interface FollowPathOptions {
-        path: any; // replace `any` with the appropriate type for path, e.g., THREE.LineCurve or other geometry type.
+        path: LineGeometry;
         duration?: number;
         trackHeading?: boolean;
     }

@@ -2,7 +2,7 @@
     import { directionsClient, mapStore } from '../../resources/stores.ts';
     import { drawLine } from '../../helpers/draw.ts';
     import cities from '../../resources/cities.json';
-    import { distanceBetween } from '../../helpers/geo.ts';
+    import { distanceBetween, pathLength } from '../../helpers/geo.ts';
     import type { Position } from 'geojson';
     import { Threebox } from 'threebox-plugin';
 
@@ -76,6 +76,23 @@
     }
 
     async function addTruck() {
+        // Find path
+        const path = [
+            [2.3522, 48.8566],
+            [2.3622, 48.8566],
+            [2.3522, 48.8566],
+        ];
+        const match = await $directionsClient.getDirections({
+            waypoints: path.map(coord => ({ coordinates: coord as [ number, number ] })),
+            profile: 'driving',
+            geometries: 'geojson',
+            overview: 'full',
+        }).send();
+        await drawLine(match.body.routes[0]!.geometry.coordinates as Position[], {
+            "line-color": "#ff0000",
+            "line-width": 3,
+            "line-opacity": 0.5,
+        });
         let threebox: Threebox;
         $mapStore.addLayer({
             id: 'truck',
@@ -91,22 +108,37 @@
                     enableSelectingObjects: true,
                 });
                 threebox.loadObj({
-                    obj: 'public/truck.glb',
+                    obj: '/truck.glb',
                     type: 'gltf',
-                    scale: 40,
+                    scale: 10,
                     units: 'meters',
                     anchor: 'bottom',
-                    rotation: { x: 90, y: 0, z: 0 },
-                }, obj => {
+                    rotation: { x: 90, y: 90, z: 0 },
+                }, async obj => {
                     console.log(obj);
                     obj.setCoords([2.3522, 48.8566]);
                     threebox.add(obj);
                     $mapStore.flyTo({
                         center: [2.3522, 48.8566],
-                        zoom: 18,
-                        pitch: 20,
+                        zoom: 19,
+                        pitch: 55,
                         duration: 1000,
-                        bearing: 40,
+                        bearing: 50,
+                    });
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    obj.followPath({
+                        path: match.body.routes[0]!.geometry.coordinates as Position[],
+                        trackHeading: true,
+                        duration: pathLength(match.body.routes[0]!.geometry.coordinates as Position[]) * 50,
+                    });
+                    obj.addEventListener('ObjectChanged', e => {
+                        console.log(e);
+                        $mapStore.panTo([e.detail.action.position![0], e.detail.action.position![1]], {
+                            animate: false,
+                        });
+                        // Rotation is in radians
+                        $mapStore.setBearing(-e.detail.action.rotation!.z * 180 / Math.PI + 190);
+                        console.log(e);
                     });
                 })
             },
