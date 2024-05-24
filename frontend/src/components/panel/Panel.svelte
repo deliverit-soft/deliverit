@@ -1,8 +1,8 @@
 <script lang="ts">
-    import { directionsClient, mapStore } from '../../resources/stores.ts';
+    import { mapStore } from '../../resources/stores.ts';
     import { drawLine } from '../../helpers/draw.ts';
     import cities from '../../resources/cities.json';
-    import { distanceBetween, pathLength } from '../../helpers/geo.ts';
+    import { distanceBetween, getRoute, pathLength } from '../../helpers/geo.ts';
     import type { Position } from 'geojson';
     import { Threebox } from 'threebox-plugin';
 
@@ -60,13 +60,8 @@
             const pack = geometry.slice(i, i + packSize);
             if (pack.length < 2)
                 continue;
-            const match = await $directionsClient.getDirections({
-                waypoints: pack.map(coord => ({ coordinates: coord as [ number, number ] })),
-                profile: 'driving',
-                geometries: 'geojson',
-                overview: 'full',
-            }).send();
-            drawLine(match.body.routes[0]!.geometry.coordinates as Position[], {
+            const route = await getRoute(pack);
+            await drawLine(route, {
                 "line-color": "#0000ff",
                 "line-width": 3,
                 "line-opacity": 0.5,
@@ -82,13 +77,8 @@
             [2.3622, 48.8566],
             [2.3522, 48.8566],
         ];
-        const match = await $directionsClient.getDirections({
-            waypoints: path.map(coord => ({ coordinates: coord as [ number, number ] })),
-            profile: 'driving',
-            geometries: 'geojson',
-            overview: 'full',
-        }).send();
-        await drawLine(match.body.routes[0]!.geometry.coordinates as Position[], {
+        const route = await getRoute(path);
+        await drawLine(route, {
             "line-color": "#ff0000",
             "line-width": 3,
             "line-opacity": 0.5,
@@ -127,9 +117,9 @@
                     });
                     await new Promise(resolve => setTimeout(resolve, 1000));
                     obj.followPath({
-                        path: match.body.routes[0]!.geometry.coordinates as Position[],
+                        path: route,
                         trackHeading: true,
-                        duration: pathLength(match.body.routes[0]!.geometry.coordinates as Position[]) * 50,
+                        duration: pathLength(route) * 50,
                     });
                     obj.addEventListener('ObjectChanged', e => {
                         console.log(e);
