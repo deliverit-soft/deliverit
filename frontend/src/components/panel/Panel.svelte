@@ -152,6 +152,9 @@
                             bearing: -e.detail.action.rotation.z * 180 / Math.PI + 190,
                         });
                     });
+                    $mapStore.on('mousedown', () => (follow = false));
+                    $mapStore.on('wheel', () => (follow = false));
+                    $mapStore.on('touchstart', () => (follow = false));
                     await new Promise(resolve => setTimeout(resolve, duration));
                     truckProgress = null;
                 });
