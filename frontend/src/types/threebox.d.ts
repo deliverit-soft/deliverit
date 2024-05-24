@@ -77,7 +77,7 @@ declare module 'threebox-plugin' {
 
         setObjectsScale(): void;
 
-        setStyle(styleId: string, options?: any): void;
+        setStyle(styleId: string, options?: mapboxgl.StyleOptions): void;
 
         setSunlight(date?: Date, coords?: LngLatLike): void;
 
@@ -213,6 +213,8 @@ declare module 'threebox-plugin' {
         terrain?: boolean;
     }
 
+    export type Anchor = 'top' | 'bottom' | 'left' | 'right' | 'center' | 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
+
     export interface ObjectOptions {
         type: string;
         obj: string;
@@ -221,7 +223,7 @@ declare module 'threebox-plugin' {
         units?: string;
         rotation?: number | { x: number; y: number; z: number };
         scale?: number | { x: number; y: number; z: number };
-        anchor?: 'top' | 'bottom' | 'left' | 'right' | 'center' | 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
+        anchor?: Anchor;
         adjustment?: { x: number; y: number; z: number };
         normalize?: boolean;
         feature?: Feature;
@@ -281,7 +283,7 @@ declare module 'threebox-plugin' {
          * @param height This object position.
          * @returns An instance of THREE.CSS2DObject.
          */
-        addCSS2D(element: HTMLElement, objName: string, center?: any, height?: number): THREE.CSS2DObject;
+        addCSS2D(element: HTMLElement, objName: string, center?: Anchor, height?: number): THREE.CSS2DObject;
 
         /**
          * Creates a browser-like help tooltip instance that is accessible through obj.help.
@@ -291,7 +293,7 @@ declare module 'threebox-plugin' {
          * @param center The position where the label will be rendered.
          * @param height This object position.
          */
-        addHelp(helpText: string, objName?: string, mapboxStyle?: boolean, center?: any, height?: number): void;
+        addHelp(helpText: string, objName?: string, mapboxStyle?: boolean, center?: Anchor, height?: number): void;
 
         /**
          * Uses the DOM HTMLElement received to paint it on screen in a relative position to the object that contains it.
@@ -300,7 +302,7 @@ declare module 'threebox-plugin' {
          * @param center The position where the label will be rendered.
          * @param height This object position.
          */
-        addLabel(HTMLElement: HTMLElement, visible?: boolean, center?: any, height?: number): void;
+        addLabel(HTMLElement: HTMLElement, visible?: boolean, center?: Anchor, height?: number): void;
 
         /**
          * Creates a browser-like tooltip for the object using the tooltipText.
@@ -310,13 +312,13 @@ declare module 'threebox-plugin' {
          * @param custom Whether the tooltip is custom.
          * @param height This object position.
          */
-        addTooltip(tooltipText: string, mapboxStyle?: boolean, center?: any, custom?: boolean, height?: number): void;
+        addTooltip(tooltipText: string, mapboxStyle?: boolean, center?: Anchor, custom?: boolean, height?: number): void;
 
         /**
          * Copies the anchor properties.
          * @param anchor The anchor to copy.
          */
-        copyAnchor(anchor: any): void;
+        copyAnchor(anchor: Anchor): void;
 
         /**
          * Creates two bounding boxes using THREE.Box3Helper.
@@ -329,7 +331,7 @@ declare module 'threebox-plugin' {
          * @param visible Whether the label will be always visible.
          * @param center The position where the label will be rendered.
          */
-        drawLabelHTML(HTMLElement: HTMLElement, visible?: boolean, center?: any): void;
+        drawLabelHTML(HTMLElement: HTMLElement, visible?: boolean, center?: Anchor): void;
 
         /**
          * Returns a clone of the object.
@@ -363,13 +365,13 @@ declare module 'threebox-plugin' {
          * @param options The configuration options for updating the object.
          */
         set(options: {
-            position?: any;
-            rotation?: any;
-            scale?: any;
-            worldCoordinates?: any;
-            quaternion?: [any, number];
-            translate?: any;
-            worldTranslate?: any;
+            position?: LngLatLike;
+            rotation?: number | Transform;
+            scale?: number | Transform;
+            worldCoordinates?: Vector3;
+            quaternion?: [Vector3, number];
+            translate?: LngLatLike;
+            worldTranslate?: Vector3;
             duration?: number;
         }): void;
 
@@ -424,7 +426,7 @@ declare module 'threebox-plugin' {
          * Moves the object from its current position adding the lnglat coordinates received.
          * @param lnglat The coordinates to translate the object.
          */
-        setTranslate(lnglat: any): void;
+        setTranslate(lnglat: LngLatLike): void;
 
 
         /**
@@ -579,5 +581,11 @@ declare module 'threebox-plugin' {
         path: LineGeometry;
         duration?: number;
         trackHeading?: boolean;
+    }
+
+    export interface Transform {
+        x: number;
+        y: number;
+        z: number;
     }
 }
