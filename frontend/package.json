@@ -1,0 +1,30 @@
+{
+  "name": "vrp-frontend",
+  "type": "module",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro check && astro build",
+    "preview": "astro preview",
+    "astro": "astro",
+    "check": "astro check"
+  },
+  "dependencies": {
+    "@mapbox/mapbox-sdk": "^0.16.0",
+    "@turf/turf": "^6.5.0",
+    "mapbox-gl": "^3.3.0",
+    "svelte": "^4.2.17",
+    "three": "^0.164.1",
+    "threebox-plugin": "^2.2.7"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.7.0",
+    "@astrojs/svelte": "^5.4.0",
+    "@types/mapbox-gl": "^3.1.0",
+    "@types/mapbox__mapbox-sdk": "^0.14.0",
+    "@types/three": "^0.164.1",
+    "astro": "^4.8.6",
+    "typescript": "^5.4.5"
+  }
+}

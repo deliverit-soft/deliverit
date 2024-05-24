@@ -1,0 +1,15 @@
+body, html {
+    /* page */
+    margin: 0;
+    padding: 0;
+    /* font */
+    font-family: "Reddit Sans", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: normal;
+    font-style: normal;
+    font-size: 1rem;
+}
+
+input, button {
+    font-family: inherit;
+}
