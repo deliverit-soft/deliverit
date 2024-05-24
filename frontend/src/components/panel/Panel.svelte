@@ -5,6 +5,7 @@
     import { distanceBetween, getRoute, pathLength } from '../../helpers/geo.ts';
     import type { Position } from 'geojson';
     import { Threebox } from 'threebox-plugin';
+    import { chunkPath } from '../../helpers/geo.js';
 
     let isResizing = false;
     let panel: HTMLElement;
@@ -70,6 +71,8 @@
         tspState = null;
     }
 
+    let follow = true;
+
     async function addTruck() {
         // Find path
         const path = [
@@ -80,8 +83,8 @@
         const route = await getRoute(path);
         await drawLine(route, {
             "line-color": "#ff0000",
-            "line-width": 3,
-            "line-opacity": 0.5,
+            "line-width": 5,
+            "line-opacity": 0.2,
         });
         let threebox: Threebox;
         $mapStore.addLayer({
@@ -91,11 +94,6 @@
             onAdd: (map, gl) => {
                 threebox = new Threebox(map, gl, {
                     defaultLights: true,
-                    enableDraggingObjects: true,
-                    enableRotatingObjects: true,
-                    enableHelpTooltips: true,
-                    enableSelectingFeatures: true,
-                    enableSelectingObjects: true,
                 });
                 threebox.loadObj({
                     obj: '/truck.glb',
@@ -116,15 +114,18 @@
                     });
                     await new Promise(resolve => setTimeout(resolve, 1000));
                     obj.followPath({
-                        path: route,
+                        path: chunkPath(route, 5),
                         trackHeading: true,
                         duration: pathLength(route) * 50,
                     });
                     obj.addEventListener('ObjectChanged', e => {
-                        console.log(e);
+                        if (!follow)
+                            return;
                         $mapStore.panTo([e.detail.action.position![0], e.detail.action.position![1]], {
                             animate: false,
                         });
+                        $mapStore.setPitch(55);
+                        $mapStore.setZoom(19);
                         // Rotation is in radians
                         $mapStore.setBearing(-e.detail.action.rotation!.z * 180 / Math.PI + 190);
                     });
@@ -171,5 +172,7 @@
     {/if}
     <br><br>
     <button on:click={addTruck}>Truck</button>
+    <br>
+    <button on:click={() => follow = !follow}>{follow ? 'Stop following' : 'Follow'}</button>
     <div class="resizer" on:mousedown={handleResizeStart} role="none" on:dblclick={handleDblClick}/>
 </aside>

@@ -1,7 +1,7 @@
 import type { Position } from 'geojson';
 import { getDirectionsClient } from '../resources/stores.ts';
 // @ts-ignore
-import { distance, lineDistance } from '@turf/turf';
+import { distance, lineDistance, lineChunk, type LineString, lineString } from '@turf/turf';
 
 export const distanceBetween = (a: Position, b: Position) => distance(a, b, { units: 'meters' });
 
@@ -14,7 +14,7 @@ export async function getRoute(path: Position[]): Promise<Position[]> {
     const directionsClient = await getDirectionsClient();
 
     const route = await directionsClient.getDirections({
-        waypoints: path.map(coordinates => ({ coordinates: coordinates as [number, number] })),
+        waypoints: path.map(coordinates => ({ coordinates: coordinates as [ number, number ] })),
         profile: 'driving',
         geometries: 'geojson',
         overview: 'full',
@@ -25,3 +25,12 @@ export async function getRoute(path: Position[]): Promise<Position[]> {
 
     return route.body.routes[0]!.geometry.coordinates as Position[];
 }
+
+export const chunkPath = (path: Position[], maxLen: number) =>
+    lineChunk(
+        lineString(path),
+        maxLen,
+        { units: 'meters' },
+    )
+        .features
+        .map((chunk: LineString) => chunk.geometry.coordinates[0] as Position[]);
