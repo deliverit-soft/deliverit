@@ -4,7 +4,7 @@
     import cities from '../../resources/cities.json';
     import { distanceBetween, getRoute, pathLength } from '../../helpers/geo.ts';
     import type { Position } from 'geojson';
-    import { Threebox } from 'threebox-plugin';
+    import { Threebox, type ThreeboxObject } from 'threebox-plugin';
     import { chunkPath } from '../../helpers/geo.js';
 
     let isResizing = false;
@@ -34,7 +34,7 @@
         $mapStore.resize();
     }
 
-    let tspState: string | null =  null;
+    let tspState: string | null = null;
 
     async function handleTsp() {
         tspState = 'Generating lines...';
@@ -63,30 +63,33 @@
                 continue;
             const route = await getRoute(pack);
             await drawLine(route, {
-                "line-color": "#0000ff",
-                "line-width": 3,
-                "line-opacity": 0.5,
+                'line-color': '#0000ff',
+                'line-width': 3,
+                'line-opacity': 0.5,
             });
         }
         tspState = null;
     }
 
-    let follow = true;
+    let follow = false;
 
     async function addTruck() {
         // Find path
         const path = [
-            [2.3522, 48.8566],
-            [2.3622, 48.8566],
-            [2.3522, 48.8566],
+            [ 2.3522, 48.8566 ],
+            [ 2.3622, 48.8566 ],
+            [ 2.3522, 48.8566 ],
         ];
         const route = await getRoute(path);
         await drawLine(route, {
-            "line-color": "#ff0000",
-            "line-width": 5,
-            "line-opacity": 0.2,
+            'line-color': '#ff0000',
+            'line-width': 5,
+            'line-opacity': 0.2,
         });
+
         let threebox: Threebox;
+        let truck: ThreeboxObject;
+
         $mapStore.addLayer({
             id: 'truck',
             type: 'custom',
@@ -103,37 +106,44 @@
                     anchor: 'bottom',
                     rotation: { x: 90, y: 90, z: 0 },
                 }, async obj => {
-                    obj.setCoords([2.3522, 48.8566]);
+                    truck = obj;
+                    truck.setCoords([ 2.3522, 48.8566 ]);
                     threebox.add(obj);
                     $mapStore.flyTo({
-                        center: [2.3522, 48.8566],
+                        center: [ 2.3522, 48.8566 ],
                         zoom: 19,
                         pitch: 55,
                         duration: 1000,
                         bearing: 50,
                     });
                     await new Promise(resolve => setTimeout(resolve, 1000));
-                    obj.followPath({
+                    truck.followPath({
                         path: chunkPath(route, 5),
                         trackHeading: true,
                         duration: pathLength(route) * 50,
                     });
-                    obj.addEventListener('ObjectChanged', e => {
-                        if (!follow)
+                    truck.addEventListener('ObjectChanged', e => {
+                        if (!follow || !e.detail.action.position || !e.detail.action.rotation)
                             return;
-                        $mapStore.panTo([e.detail.action.position![0], e.detail.action.position![1]], {
+                        $mapStore.panTo([ e.detail.action.position[0], e.detail.action.position[1] ], {
                             animate: false,
                         });
                         $mapStore.setPitch(55);
                         $mapStore.setZoom(19);
                         // Rotation is in radians
-                        $mapStore.setBearing(-e.detail.action.rotation!.z * 180 / Math.PI + 190);
+                        $mapStore.setBearing(-e.detail.action.rotation.z * 180 / Math.PI + 190);
                     });
-                })
+                });
             },
             render: _ => {
                 threebox.update();
-            }
+
+                if (truck) {
+                    const newVisibility = $mapStore.getZoom() > 15;
+                    if (truck.visibility !== newVisibility)
+                        truck.visibility = newVisibility;
+                }
+            },
         });
 
         // @ts-ignore
