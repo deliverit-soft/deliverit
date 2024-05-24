@@ -6,6 +6,7 @@
     import type { Position } from 'geojson';
     import { Threebox, type ThreeboxObject } from 'threebox-plugin';
     import { chunkPath } from '../../helpers/geo.js';
+    import { type LngLatLike, Marker } from 'mapbox-gl';
 
     let isResizing = false;
     let panel: HTMLElement;
@@ -75,7 +76,7 @@
 
     async function addTruck() {
         // Find path
-        const path = [
+        const path: Position[] = [
             [ 2.3522, 48.8566 ],
             [ 2.3622, 48.8566 ],
             [ 2.3522, 48.8566 ],
@@ -89,6 +90,13 @@
 
         let threebox: Threebox;
         let truck: ThreeboxObject;
+
+        // Add marker to map
+        const marker = new Marker({
+            color: '#ff0000',
+        });
+        marker.setLngLat(path[0] as LngLatLike);
+        marker.addTo($mapStore);
 
         $mapStore.addLayer({
             id: 'truck',
@@ -123,14 +131,20 @@
                         duration: pathLength(route) * 50,
                     });
                     truck.addEventListener('ObjectChanged', e => {
-                        if (!follow || !e.detail.action.position || !e.detail.action.rotation)
+                        if (!e.detail.action.position)
+                            return;
+
+                        // Update marker
+                        marker.setLngLat([ e.detail.action.position[0], e.detail.action.position[1] ] as LngLatLike);
+                        marker.addTo($mapStore);
+
+                        if (!follow || !e.detail.action.rotation)
                             return;
                         $mapStore.panTo([ e.detail.action.position[0], e.detail.action.position[1] ], {
                             animate: false,
                         });
                         $mapStore.setPitch(55);
                         $mapStore.setZoom(19);
-                        // Rotation is in radians
                         $mapStore.setBearing(-e.detail.action.rotation.z * 180 / Math.PI + 190);
                     });
                 });
@@ -142,6 +156,7 @@
                     const newVisibility = $mapStore.getZoom() > 15;
                     if (truck.visibility !== newVisibility)
                         truck.visibility = newVisibility;
+                    marker.getElement().style.visibility = newVisibility ? 'hidden' : 'visible';
                 }
             },
         });
@@ -173,7 +188,7 @@
     }
 </style>
 
-<svelte:body on:mouseup={handleResizeEnd} on:mousemove={handleMouseMove}/>
+<svelte:body on:mousemove={handleMouseMove} on:mouseup={handleResizeEnd}/>
 
 <aside bind:this={panel}>
     <button on:click={handleTsp}>Start TSP</button>
@@ -184,5 +199,5 @@
     <button on:click={addTruck}>Truck</button>
     <br>
     <button on:click={() => follow = !follow}>{follow ? 'Stop following' : 'Follow'}</button>
-    <div class="resizer" on:mousedown={handleResizeStart} role="none" on:dblclick={handleDblClick}/>
+    <div class="resizer" on:dblclick={handleDblClick} on:mousedown={handleResizeStart} role="none"/>
 </aside>
