@@ -128,7 +128,7 @@
                     truck.followPath({
                         path: chunkPath(route, 5),
                         trackHeading: true,
-                        duration: pathLength(route) * 50,
+                        duration: pathLength(route) * 20,
                     });
                     truck.addEventListener('ObjectChanged', e => {
                         if (!e.detail.action.position)
@@ -140,12 +140,12 @@
 
                         if (!follow || !e.detail.action.rotation)
                             return;
-                        $mapStore.panTo([ e.detail.action.position[0], e.detail.action.position[1] ], {
-                            animate: false,
+                        $mapStore.jumpTo({
+                            center: [ e.detail.action.position[0], e.detail.action.position[1] ],
+                            zoom: 19,
+                            pitch: 55,
+                            bearing: -e.detail.action.rotation.z * 180 / Math.PI + 190,
                         });
-                        $mapStore.setPitch(55);
-                        $mapStore.setZoom(19);
-                        $mapStore.setBearing(-e.detail.action.rotation.z * 180 / Math.PI + 190);
                     });
                 });
             },
