@@ -73,6 +73,7 @@
     }
 
     let follow = false;
+    let truckProgress: null | number = null;
 
     async function addTruck() {
         // Find path
@@ -125,11 +126,13 @@
                         bearing: 50,
                     });
                     await new Promise(resolve => setTimeout(resolve, 1000));
+                    const duration = pathLength(route) * 20;
                     truck.followPath({
                         path: chunkPath(route, 5),
                         trackHeading: true,
-                        duration: pathLength(route) * 20,
+                        duration,
                     });
+                    const start = Date.now();
                     truck.addEventListener('ObjectChanged', e => {
                         if (!e.detail.action.position)
                             return;
@@ -137,6 +140,8 @@
                         // Update marker
                         marker.setLngLat([ e.detail.action.position[0], e.detail.action.position[1] ] as LngLatLike);
                         marker.addTo($mapStore);
+
+                        truckProgress = Math.round((Date.now() - start) / duration * 1000) / 10;
 
                         if (!follow || !e.detail.action.rotation)
                             return;
@@ -147,6 +152,8 @@
                             bearing: -e.detail.action.rotation.z * 180 / Math.PI + 190,
                         });
                     });
+                    await new Promise(resolve => setTimeout(resolve, duration));
+                    truckProgress = null;
                 });
             },
             render: _ => {
@@ -196,7 +203,12 @@
         {tspState}
     {/if}
     <br><br>
-    <button on:click={addTruck}>Truck</button>
+    <button on:click={addTruck}>
+        Truck
+        {#if truckProgress !== null}
+            {truckProgress}%
+        {/if}
+    </button>
     <br>
     <button on:click={() => follow = !follow}>{follow ? 'Stop following' : 'Follow'}</button>
     <div class="resizer" on:dblclick={handleDblClick} on:mousedown={handleResizeStart} role="none"/>
