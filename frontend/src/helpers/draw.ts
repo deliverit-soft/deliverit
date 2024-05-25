@@ -40,7 +40,7 @@ export async function drawLine(
             'line-cap': 'round',
         },
         paint,
-    });
+    }, 'building-extrusion');
 
     return line;
 }
