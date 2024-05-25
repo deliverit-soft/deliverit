@@ -1,10 +1,10 @@
 <script lang="ts">
-    import { mapStore } from '../../resources/stores.ts';
+    import { mapStore, threebox } from '../../resources/stores.ts';
     import { drawLine } from '../../helpers/draw.ts';
     import cities from '../../resources/cities.json';
-    import { distanceBetween, getRoute, pathLength } from '../../helpers/geo.ts';
+    import { distanceBetween, getRoute, pathLength, sliceAlongPath } from '../../helpers/geo.ts';
     import type { Position } from 'geojson';
-    import { Threebox, type ThreeboxObject } from 'threebox-plugin';
+    import { type ThreeboxObject } from 'threebox-plugin';
     import { chunkPath } from '../../helpers/geo.js';
     import { type LngLatLike, Marker } from 'mapbox-gl';
 
@@ -73,7 +73,29 @@
     }
 
     let follow = false;
-    let truckProgress: null | number = null;
+    let speed: number = 1;
+    let truckProgress: number = 0;
+    let truck: ThreeboxObject;
+    let truckPathDistance: number;
+    let truckPath: Position[] = [];
+    let truckPathDuration = 0;
+
+    $: updateTruckSpeed(speed);
+
+    function updateTruckSpeed(_: number) {
+        if (!truck)
+            return;
+        truck.stop();
+        const pathWithProgress = sliceAlongPath(truckPath, truckProgress * truckPathDistance, truckPathDistance);
+        const newPathDistance = pathLength(pathWithProgress);
+        truck.followPath({
+            path: pathWithProgress,
+            trackHeading: true,
+            duration: truckPathDuration * (1 - truckProgress / 100) / speed,
+        });
+        // TODO: Fix duration calculation
+        console.log(`Selected speed: ${speed}, calculated speed: ${truckPathDuration * (1 - truckProgress / 100) / 20 / newPathDistance * speed}`);
+    }
 
     async function addTruck() {
         // Find path
@@ -89,9 +111,6 @@
             'line-opacity': 0.2,
         });
 
-        let threebox: Threebox;
-        let truck: ThreeboxObject;
-
         // Add marker to map
         const marker = new Marker({
             color: '#ff0000',
@@ -99,80 +118,68 @@
         marker.setLngLat(path[0] as LngLatLike);
         marker.addTo($mapStore);
 
-        $mapStore.addLayer({
-            id: 'truck',
-            type: 'custom',
-            renderingMode: '3d',
-            onAdd: (map, gl) => {
-                threebox = new Threebox(map, gl, {
-                    defaultLights: true,
+        $threebox.loadObj({
+            obj: '/truck.glb',
+            type: 'gltf',
+            scale: 10,
+            units: 'meters',
+            anchor: 'bottom',
+            rotation: { x: 90, y: 90, z: 0 },
+        }, async obj => {
+            truck = obj;
+            truck.setCoords([ 2.3522, 48.8566 ]);
+            $threebox.add(obj);
+            $mapStore.flyTo({
+                center: [ 2.3522, 48.8566 ],
+                zoom: 19,
+                pitch: 55,
+                duration: 1000,
+                bearing: 50,
+            });
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            truckPathDistance = pathLength(route);
+            truckPathDuration = truckPathDistance * 20;
+            truckPath = chunkPath(route, 5);
+            truck.followPath({
+                path: truckPath,
+                trackHeading: true,
+                duration: truckPathDuration / speed,
+            });
+            let truckLastPosition = truckPath[0] as Position;
+            truck.addEventListener('ObjectChanged', e => {
+                if (!e.detail.action.position)
+                    return;
+
+                // Update marker
+                marker.setLngLat([ e.detail.action.position[0], e.detail.action.position[1] ] as LngLatLike);
+                marker.addTo($mapStore);
+
+                truckProgress += distanceBetween(truckLastPosition, e.detail.action.position) / truckPathDistance;
+                truckLastPosition = e.detail.action.position;
+
+                if (!follow || !e.detail.action.rotation)
+                    return;
+                $mapStore.jumpTo({
+                    center: [ e.detail.action.position[0], e.detail.action.position[1] ],
+                    zoom: 19,
+                    pitch: 55,
+                    bearing: -e.detail.action.rotation.z * 180 / Math.PI + 190,
                 });
-                threebox.loadObj({
-                    obj: '/truck.glb',
-                    type: 'gltf',
-                    scale: 10,
-                    units: 'meters',
-                    anchor: 'bottom',
-                    rotation: { x: 90, y: 90, z: 0 },
-                }, async obj => {
-                    truck = obj;
-                    truck.setCoords([ 2.3522, 48.8566 ]);
-                    threebox.add(obj);
-                    $mapStore.flyTo({
-                        center: [ 2.3522, 48.8566 ],
-                        zoom: 19,
-                        pitch: 55,
-                        duration: 1000,
-                        bearing: 50,
-                    });
-                    await new Promise(resolve => setTimeout(resolve, 1000));
-                    const duration = pathLength(route) * 20;
-                    truck.followPath({
-                        path: chunkPath(route, 5),
-                        trackHeading: true,
-                        duration,
-                    });
-                    const start = Date.now();
-                    truck.addEventListener('ObjectChanged', e => {
-                        if (!e.detail.action.position)
-                            return;
+            });
+            $mapStore.on('mousedown', () => (follow = false));
+            $mapStore.on('wheel', () => (follow = false));
+            $mapStore.on('touchstart', () => (follow = false));
 
-                        // Update marker
-                        marker.setLngLat([ e.detail.action.position[0], e.detail.action.position[1] ] as LngLatLike);
-                        marker.addTo($mapStore);
+            function updateVisibility() {
+                const newVisibility = $mapStore.getZoom() > 15;
+                if (truck.visibility !== newVisibility)
+                    truck.visibility = newVisibility;
+                marker.getElement().style.visibility = newVisibility ? 'hidden' : 'visible';
+                requestAnimationFrame(updateVisibility);
+            }
 
-                        truckProgress = Math.round((Date.now() - start) / duration * 1000) / 10;
-
-                        if (!follow || !e.detail.action.rotation)
-                            return;
-                        $mapStore.jumpTo({
-                            center: [ e.detail.action.position[0], e.detail.action.position[1] ],
-                            zoom: 19,
-                            pitch: 55,
-                            bearing: -e.detail.action.rotation.z * 180 / Math.PI + 190,
-                        });
-                    });
-                    $mapStore.on('mousedown', () => (follow = false));
-                    $mapStore.on('wheel', () => (follow = false));
-                    $mapStore.on('touchstart', () => (follow = false));
-                    await new Promise(resolve => setTimeout(resolve, duration));
-                    truckProgress = null;
-                });
-            },
-            render: _ => {
-                threebox.update();
-
-                if (truck) {
-                    const newVisibility = $mapStore.getZoom() > 15;
-                    if (truck.visibility !== newVisibility)
-                        truck.visibility = newVisibility;
-                    marker.getElement().style.visibility = newVisibility ? 'hidden' : 'visible';
-                }
-            },
+            updateVisibility();
         });
-
-        // @ts-ignore
-        window.tb = threebox;
     }
 </script>
 
@@ -208,11 +215,13 @@
     <br><br>
     <button on:click={addTruck}>
         Truck
-        {#if truckProgress !== null}
-            {truckProgress}%
+        {#if truckProgress !== 0}
+            {truckProgress * 100}%
         {/if}
     </button>
     <br>
     <button on:click={() => follow = !follow}>{follow ? 'Stop following' : 'Follow'}</button>
+    <br>
+    <input bind:value={speed} max="10" min="1" step="1" type="range"/> {speed}
     <div class="resizer" on:dblclick={handleDblClick} on:mousedown={handleResizeStart} role="none"/>
 </aside>

@@ -1,7 +1,7 @@
 import type { Position } from 'geojson';
 import { getDirectionsClient } from '../resources/stores.ts';
 // @ts-ignore
-import { distance, lineDistance, lineChunk, type LineString, lineString } from '@turf/turf';
+import { distance, lineDistance, lineChunk, type LineString, lineString, lineSliceAlong } from '@turf/turf';
 
 export const distanceBetween = (a: Position, b: Position) => distance(a, b, { units: 'meters' });
 
@@ -34,3 +34,11 @@ export const chunkPath = (path: Position[], maxLen: number) =>
     )
         .features
         .map((chunk: LineString) => chunk.geometry.coordinates[0] as Position[]);
+
+export const sliceAlongPath = (path: Position[], start: number, end: number) =>
+    lineSliceAlong(
+        lineString(path),
+        start,
+        end,
+        { units: 'meters' },
+    ).geometry.coordinates as Position[];
