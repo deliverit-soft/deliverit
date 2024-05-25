@@ -179,7 +179,7 @@
 <style>
     aside {
         width: 25rem;
-        height: 100%;
+        height: calc(100% - 2rem);
         box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
         z-index: 1;
         position: relative;
