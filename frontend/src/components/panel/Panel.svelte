@@ -72,10 +72,9 @@
         tspState = null;
     }
 
-    let follow = false;
     let speed: number = 1;
     let truckProgress: number = 0;
-    let truck: ThreeboxObject;
+    let truck: Truck;
     let truckPathDistance: number;
     let truckPath: Position[] = [];
     let truckPathDuration = 0;
@@ -85,10 +84,10 @@
     function updateTruckSpeed(_: number) {
         if (!truck)
             return;
-        truck.stop();
+        truck.object.stop();
         const pathWithProgress = sliceAlongPath(truckPath, truckProgress * truckPathDistance, truckPathDistance);
         const newPathDistance = pathLength(pathWithProgress);
-        truck.followPath({
+        truck.object.followPath({
             path: pathWithProgress,
             trackHeading: true,
             duration: truckPathDuration * (1 - truckProgress / 100) / speed,
@@ -112,9 +111,10 @@
         });
 
         // Spawn truck
-        const truck = new Truck({
+        truck = new Truck({
             id: 'truck',
-            enableMarker: true
+            enableMarker: true,
+            autoCameraFollow: true,
         });
         await truck.load();
         truck.object.setCoords(route[0] as LngLatLike);
@@ -124,22 +124,6 @@
             truckProgress = truck.progress;
         });
         await truck.followPath(route);
-
-        // truck.addEventListener('ObjectChanged', e => {
-        //     if (!e.detail.action.position)
-        //         return;
-        //     if (!follow || !e.detail.action.rotation)
-        //         return;
-        //     $mapStore.jumpTo({
-        //         center: [ e.detail.action.position[0], e.detail.action.position[1] ],
-        //         zoom: 19,
-        //         pitch: 55,
-        //         bearing: -e.detail.action.rotation.z * 180 / Math.PI + 190,
-        //     });
-        // });
-        // $mapStore.on('mousedown', () => (follow = false));
-        // $mapStore.on('wheel', () => (follow = false));
-        // $mapStore.on('touchstart', () => (follow = false));
     }
 </script>
 
@@ -182,7 +166,7 @@
     <br>
     <progress max="100" value={truckProgress * 100}/>
     <br>
-    <button on:click={() => follow = !follow}>{follow ? 'Stop following' : 'Follow'}</button>
+    <button on:click={() => truck.follow()}>Follow</button>
     <br>
     <input bind:value={speed} max="10" min="1" step="1" type="range"/> {speed}
     <div class="resizer" on:dblclick={handleDblClick} on:mousedown={handleResizeStart} role="none"/>

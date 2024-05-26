@@ -15,6 +15,7 @@ export class Truck extends EventTarget {
     // Config
     readonly #id: string;
     readonly #zoomMarkerThreshold: number = 15.5;
+    readonly #autoCameraFollow: boolean = false;
 
     // Properties
     #loaded = false;
@@ -28,6 +29,7 @@ export class Truck extends EventTarget {
     #previousPosition: Position | null = null;
     #enableMarker: boolean = true;
     markerColor: string = '#FF0000';
+    #cameraFollow: boolean = false;
 
     // Instances
     #truck: ThreeboxObject | null = null;
@@ -39,6 +41,7 @@ export class Truck extends EventTarget {
         this.enableMarker = config.enableMarker ?? false;
         this.markerColor = config.markerColor ?? this.markerColor;
         this.#zoomMarkerThreshold = config.zoomMarkerThreshold ?? this.#zoomMarkerThreshold;
+        this.#autoCameraFollow = config.autoCameraFollow ?? this.#autoCameraFollow;
 
         if (this.enableMarker) {
             this.#marker = new mapboxgl.Marker({
@@ -137,6 +140,7 @@ export class Truck extends EventTarget {
 
         this.#marker?.remove();
         getMap().off('zoom', this.onZoom.bind(this));
+        this.unfollow();
         getThreebox().remove(this.object);
         this.#spawned = false;
         this.dispatchEvent(new Event('destroy'));
@@ -160,6 +164,30 @@ export class Truck extends EventTarget {
         await new Promise<void>(resolve => setTimeout(resolve, duration));
     }
 
+    /**
+     * Attach the camera to the truck and follow it.
+     * The camera is detached on user interaction
+     */
+    public follow() {
+        if (this.#cameraFollow || !this.#spawned || !this.#truck || !this.#followPath)
+            return;
+
+        this.#cameraFollow = true;
+        this.dispatchEvent(new Event('cameraFollow'));
+
+        getMap().on('mousedown', this.unfollow.bind(this));
+        getMap().on('wheel', this.unfollow.bind(this));
+        getMap().on('touchstart', this.unfollow.bind(this));
+    }
+
+    public unfollow() {
+        this.#cameraFollow = false;
+        this.dispatchEvent(new Event('cameraUnfollow'));
+        getMap().off('mousedown', this.unfollow.bind(this));
+        getMap().off('wheel', this.unfollow.bind(this));
+        getMap().off('touchstart', this.unfollow.bind(this));
+    }
+
     public async followPath(path: Position[]): Promise<void> {
         if (this.#followPath)
             return;
@@ -177,13 +205,16 @@ export class Truck extends EventTarget {
         });
 
         this.#followPath = true;
+
+        if (this.#autoCameraFollow)
+            this.follow();
         await new Promise<Event>(resolve => this.addEventListener('pathEnd', resolve, { once: true }));
     }
 
     // Event Handlers
 
     private onObjectChanged(ev: ObjectEventArgs<ObjectChangedEventDetail>) {
-        const { position } = ev.detail.action;
+        const { position, rotation } = ev.detail.action;
 
         // Update marker position
         if (this.#marker && position)
@@ -196,6 +227,15 @@ export class Truck extends EventTarget {
             this.#lastMoveRegistered = Date.now();
             this.dispatchProgress();
         }
+
+        // Update camera position
+        if (this.#cameraFollow && position && rotation)
+            getMap().jumpTo({
+                center: [ position[0], position[1] ],
+                zoom: 19,
+                bearing: -rotation.z * 180 / Math.PI + 185,
+                pitch: 70,
+            })
     }
 
     private onMarkerClick() {
@@ -221,6 +261,7 @@ export class Truck extends EventTarget {
         if (this.#followPath && Date.now() - this.#lastMoveRegistered > 100) {
             this.#followPath = false;
             this.#pathProgress = 1;
+            this.#cameraFollow = false;
             this.dispatchProgress();
             this.dispatchEvent(new Event('pathEnd'));
         }
@@ -243,19 +284,25 @@ export interface TruckConfig {
     id: string;
 
     /**
-     * Enable a marker to be shown when the truck is not visible
+     * Enable a marker to be shown when the truck is not visible, default is true
      */
     enableMarker?: boolean;
 
     /**
-     * Color of the marker, if enabled
+     * Color of the marker, if enabled. Default is red
      */
     markerColor?: string;
 
     /**
-     * Max zoom level to show the truck, a value greater than that will hide the truck and show the marker
+     * Max zoom level to show the truck, a value greater than that will hide the truck and show the marker,
+     * default is 15.5
      */
     zoomMarkerThreshold?: number;
+
+    /**
+     * Active camera follow mode whenever the truck follows a path, default is false
+     */
+    autoCameraFollow?: boolean;
 }
 
 export interface PathProgressEventDetail {
