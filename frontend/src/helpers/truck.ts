@@ -8,7 +8,7 @@ import type {
 } from 'threebox-plugin';
 import type { Position } from 'geojson';
 import { getMap, getThreebox } from '../resources/stores.ts';
-import { chunkPath, pathLength } from './geo.ts';
+import { chunkPath, pathLength, sliceAlongPath } from './geo.ts';
 import mapboxgl from 'mapbox-gl';
 
 export class Truck extends EventTarget {
@@ -100,6 +100,18 @@ export class Truck extends EventTarget {
             throw new Error('Speed must be greater than 0');
 
         this.#speed = speed;
+
+        // If truck is moving, update the animation with the new duration
+        if (this.#followPath) {
+            this.object.stop();
+            const remainingPath = sliceAlongPath(this.#chunkedPath, this.#pathLength * this.#pathProgress, this.#pathLength);
+
+            this.object.followPath({
+                path: remainingPath,
+                trackHeading: true,
+                duration: (this.#pathLength * (1 - this.#pathProgress)) / this.#speed * 1000,
+            });
+        }
     }
 
     // Lifecycle

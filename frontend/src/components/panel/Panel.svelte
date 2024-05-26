@@ -2,9 +2,8 @@
     import { mapStore } from '../../resources/stores.ts';
     import { drawLine } from '../../helpers/draw.ts';
     import cities from '../../resources/cities.json';
-    import { distanceBetween, getRoute, pathLength, sliceAlongPath } from '../../helpers/geo.ts';
+    import { distanceBetween, getRoute } from '../../helpers/geo.ts';
     import type { Position } from 'geojson';
-    import { type ThreeboxObject } from 'threebox-plugin';
     import { type LngLatLike } from 'mapbox-gl';
     import { Truck } from '../../helpers/truck.ts';
 
@@ -75,26 +74,8 @@
     let speed: number = 1;
     let truckProgress: number = 0;
     let truck: Truck;
-    let truckPathDistance: number;
-    let truckPath: Position[] = [];
-    let truckPathDuration = 0;
 
-    $: updateTruckSpeed(speed);
-
-    function updateTruckSpeed(_: number) {
-        if (!truck)
-            return;
-        truck.object.stop();
-        const pathWithProgress = sliceAlongPath(truckPath, truckProgress * truckPathDistance, truckPathDistance);
-        const newPathDistance = pathLength(pathWithProgress);
-        truck.object.followPath({
-            path: pathWithProgress,
-            trackHeading: true,
-            duration: truckPathDuration * (1 - truckProgress / 100) / speed,
-        });
-        // TODO: Fix duration calculation
-        console.log(`Selected speed: ${speed}, calculated speed: ${truckPathDuration * (1 - truckProgress / 100) / 20 / newPathDistance * speed}`);
-    }
+    $: truck && (truck.speed = speed * 50);
 
     async function addTruck() {
         // Find path
