@@ -27,6 +27,7 @@ export class Truck extends EventTarget {
     #pathProgress = 0;
     #chunkedPath: Position[] = [];
     #previousPosition: Position | null = null;
+    #speed: number = 50; // m/s
     #enableMarker: boolean = true;
     markerColor: string = '#FF0000';
     #cameraFollow: boolean = false;
@@ -86,6 +87,19 @@ export class Truck extends EventTarget {
 
     public get progress() {
         return this.#pathProgress;
+    }
+
+    /** Get truck speed (m/s) */
+    public get speed() {
+        return this.#speed;
+    }
+
+    /** Set truck speed (m/s) */
+    public set speed(speed: number) {
+        if (speed <= 0)
+            throw new Error('Speed must be greater than 0');
+
+        this.#speed = speed;
     }
 
     // Lifecycle
@@ -201,7 +215,7 @@ export class Truck extends EventTarget {
         this.object.followPath({
             path: this.#chunkedPath,
             trackHeading: true,
-            duration: 10000,
+            duration: this.#pathLength / this.#speed * 1000,
         });
 
         this.#followPath = true;
@@ -235,7 +249,7 @@ export class Truck extends EventTarget {
                 zoom: 19,
                 bearing: -rotation.z * 180 / Math.PI + 185,
                 pitch: 70,
-            })
+            });
     }
 
     private onMarkerClick() {
