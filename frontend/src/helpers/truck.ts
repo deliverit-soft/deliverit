@@ -239,7 +239,10 @@ export class Truck extends EventTarget {
     }
 
     private onMarkerClick() {
-        this.focus();
+        if (!this.#followPath)
+            this.focus();
+        else
+            this.follow();
     }
 
     private onZoom() {
