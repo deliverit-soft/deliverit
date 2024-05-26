@@ -1,12 +1,12 @@
 <script lang="ts">
-    import { mapStore, threebox } from '../../resources/stores.ts';
+    import { mapStore } from '../../resources/stores.ts';
     import { drawLine } from '../../helpers/draw.ts';
     import cities from '../../resources/cities.json';
     import { distanceBetween, getRoute, pathLength, sliceAlongPath } from '../../helpers/geo.ts';
     import type { Position } from 'geojson';
     import { type ThreeboxObject } from 'threebox-plugin';
-    import { chunkPath } from '../../helpers/geo.js';
-    import { type LngLatLike, Marker } from 'mapbox-gl';
+    import { type LngLatLike } from 'mapbox-gl';
+    import { Truck } from '../../helpers/truck.ts';
 
     let isResizing = false;
     let panel: HTMLElement;
@@ -25,7 +25,7 @@
         if (!isResizing)
             return;
 
-        const width = Math.min(maxWidth, Math.max(minWidth, event.clientX));
+        const width = Math.min(maxWidth, Math.max(minWidth, event.clientX)) - 32;
         panel.style.width = `${width}px`;
         $mapStore.resize();
     }
@@ -111,75 +111,35 @@
             'line-opacity': 0.2,
         });
 
-        // Add marker to map
-        const marker = new Marker({
-            color: '#ff0000',
+        // Spawn truck
+        const truck = new Truck({
+            id: 'truck',
+            enableMarker: true
         });
-        marker.setLngLat(path[0] as LngLatLike);
-        marker.addTo($mapStore);
-
-        $threebox.loadObj({
-            obj: '/truck.glb',
-            type: 'gltf',
-            scale: 10,
-            units: 'meters',
-            anchor: 'bottom',
-            rotation: { x: 90, y: 90, z: 0 },
-        }, async obj => {
-            truck = obj;
-            truck.setCoords([ 2.3522, 48.8566 ]);
-            $threebox.add(obj);
-            $mapStore.flyTo({
-                center: [ 2.3522, 48.8566 ],
-                zoom: 19,
-                pitch: 55,
-                duration: 1000,
-                bearing: 50,
-            });
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            truckPathDistance = pathLength(route);
-            truckPathDuration = truckPathDistance * 20;
-            truckPath = chunkPath(route, 5);
-            truck.followPath({
-                path: truckPath,
-                trackHeading: true,
-                duration: truckPathDuration / speed,
-            });
-            let truckLastPosition = truckPath[0] as Position;
-            truck.addEventListener('ObjectChanged', e => {
-                if (!e.detail.action.position)
-                    return;
-
-                // Update marker
-                marker.setLngLat([ e.detail.action.position[0], e.detail.action.position[1] ] as LngLatLike);
-                marker.addTo($mapStore);
-
-                truckProgress += distanceBetween(truckLastPosition, e.detail.action.position) / truckPathDistance;
-                truckLastPosition = e.detail.action.position;
-
-                if (!follow || !e.detail.action.rotation)
-                    return;
-                $mapStore.jumpTo({
-                    center: [ e.detail.action.position[0], e.detail.action.position[1] ],
-                    zoom: 19,
-                    pitch: 55,
-                    bearing: -e.detail.action.rotation.z * 180 / Math.PI + 190,
-                });
-            });
-            $mapStore.on('mousedown', () => (follow = false));
-            $mapStore.on('wheel', () => (follow = false));
-            $mapStore.on('touchstart', () => (follow = false));
-
-            function updateVisibility() {
-                const newVisibility = $mapStore.getZoom() > 15;
-                if (truck.visibility !== newVisibility)
-                    truck.visibility = newVisibility;
-                marker.getElement().style.visibility = newVisibility ? 'hidden' : 'visible';
-                requestAnimationFrame(updateVisibility);
-            }
-
-            updateVisibility();
+        await truck.load();
+        truck.object.setCoords(route[0] as LngLatLike);
+        truck.spawn();
+        await truck.focus();
+        truck.addEventListener('pathProgress', () => {
+            truckProgress = truck.progress;
         });
+        await truck.followPath(route);
+
+        // truck.addEventListener('ObjectChanged', e => {
+        //     if (!e.detail.action.position)
+        //         return;
+        //     if (!follow || !e.detail.action.rotation)
+        //         return;
+        //     $mapStore.jumpTo({
+        //         center: [ e.detail.action.position[0], e.detail.action.position[1] ],
+        //         zoom: 19,
+        //         pitch: 55,
+        //         bearing: -e.detail.action.rotation.z * 180 / Math.PI + 190,
+        //     });
+        // });
+        // $mapStore.on('mousedown', () => (follow = false));
+        // $mapStore.on('wheel', () => (follow = false));
+        // $mapStore.on('touchstart', () => (follow = false));
     }
 </script>
 
@@ -216,9 +176,11 @@
     <button on:click={addTruck}>
         Truck
         {#if truckProgress !== 0}
-            {truckProgress * 100}%
+            {Math.round(truckProgress * 100)}%
         {/if}
     </button>
+    <br>
+    <progress max="100" value={truckProgress * 100}/>
     <br>
     <button on:click={() => follow = !follow}>{follow ? 'Stop following' : 'Follow'}</button>
     <br>

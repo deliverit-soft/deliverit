@@ -452,6 +452,11 @@ declare module 'threebox-plugin' {
         color: number;
 
         /**
+         * Object coordinates
+         */
+        coordinates: LngLatLike;
+
+        /**
          * Returns a CSS2DObject value that represents the help tooltip of a THREE.ThreeboxObject created by obj.addHelp method.
          * This is an internal object only visible on drag&drop actions over an object.
          */
@@ -489,6 +494,11 @@ declare module 'threebox-plugin' {
          * The value of the option of objects to receive a shadow.
          */
         receiveShadow: boolean;
+
+        /**
+         * Object rotation
+         */
+        rotation: Transform;
 
         /**
          * The value that represents the tooltip of a THREE.ThreeboxObject created by obj.addTooltip method.
@@ -553,8 +563,8 @@ declare module 'threebox-plugin' {
     export interface ObjectChangedEventDetail extends ObjectEventDetail {
         action: {
             position?: [number, number, number];
-            rotation?: { x: number; y: number; z: number };
-            scale?: { x: number; y: number; z: number };
+            rotation?: Transform;
+            scale?: Transform;
         };
     }
 
@@ -566,7 +576,11 @@ declare module 'threebox-plugin' {
         selected: boolean;
     }
 
-    export type ObjectEventListener<T> = (eventArgs: { detail: T }) => void;
+    export type ObjectEventListener<T> = (eventArgs: ObjectEventArgs<T>) => void;
+
+    export interface ObjectEventArgs<T> {
+        detail: T
+    }
 
     export interface AnimationOptions {
         duration?: number;
