@@ -11,9 +11,7 @@ export const pathLength = (path: Position[]) => lineDistance(
 );
 
 export async function getRoute(path: Position[]): Promise<Position[]> {
-    const directionsClient = await getDirectionsClient();
-
-    const route = await directionsClient.getDirections({
+    const route = await getDirectionsClient().getDirections({
         waypoints: path.map(coordinates => ({ coordinates: coordinates as [ number, number ] })),
         profile: 'driving',
         geometries: 'geojson',

@@ -1,14 +1,9 @@
-import { type Readable, readable, type Writable, writable } from 'svelte/store';
+import { type Readable, readable, type Writable, writable, get } from 'svelte/store';
 import mapboxgl from 'mapbox-gl';
 import Directions, { type DirectionsService } from '@mapbox/mapbox-sdk/services/directions';
 import type { Threebox } from 'threebox-plugin';
 
-const storeToValue = <T>(store: Writable<T> | Readable<T>): Promise<T> => new Promise<T>((resolve) => {
-    const unsubscribe = store.subscribe(value => {
-        resolve(value);
-    });
-    unsubscribe();
-});
+const storeToValue = <T>(store: Writable<T> | Readable<T>): T => get(store);
 
 export const mapStore = writable<mapboxgl.Map>();
 export const getMap = () => storeToValue(mapStore);
