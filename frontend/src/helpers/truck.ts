@@ -243,6 +243,7 @@ export class Truck extends EventTarget {
         this.#pathLength = pathLength(path);
         this.#pathProgress = 0;
         this.#chunkedPath = chunkPath(path, 5);
+        this.#previousPosition = this.#chunkedPath[0]!;
         this.#lastMoveRegistered = Date.now();
 
         this.object.followPath({
