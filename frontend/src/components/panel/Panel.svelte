@@ -147,7 +147,7 @@
     <br>
     <progress max="100" value={truckProgress * 100}/>
     <br>
-    <button on:click={() => truck.follow()}>Follow</button>
+    <button on:click={() => truck.follow(true)}>Follow</button>
     <br>
     <input bind:value={speed} max="10" min="1" step="1" type="range"/> {speed}
     <div class="resizer" on:dblclick={handleDblClick} on:mousedown={handleResizeStart} role="none"/>

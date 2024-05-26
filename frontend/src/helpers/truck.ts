@@ -8,14 +8,19 @@ import type {
 } from 'threebox-plugin';
 import type { Position } from 'geojson';
 import { getMap, getThreebox } from '../resources/stores.ts';
-import { chunkPath, pathLength, sliceAlongPath } from './geo.ts';
-import mapboxgl from 'mapbox-gl';
+import { alongPath, chunkPath, pathBearing, pathLength, sliceAlongPath } from './geo.ts';
+import mapboxgl, { type LngLatLike } from 'mapbox-gl';
 
 export class Truck extends EventTarget {
     // Config
     readonly #id: string;
     readonly #zoomMarkerThreshold: number = 15.5;
     readonly #autoCameraFollow: boolean = false;
+
+    // Constants
+    readonly CAMERA_FOLLOW_PITCH = 70;
+    readonly CAMERA_FOLLOW_BEARING = 185;
+    readonly CAMERA_CLOSEUP_ZOOM = 19;
 
     // Properties
     #loaded = false;
@@ -178,12 +183,24 @@ export class Truck extends EventTarget {
      * Focus the camera on the truck
      */
     public async focus(rotate = true, duration = 1000) {
+        if (!this.#spawned || !this.#truck)
+            return;
+
+        let center = this.object.coordinates;
+        let bearing = -this.object.rotation.z * 180 / Math.PI + 45;
+        const pitch = this.#followPath ? this.CAMERA_FOLLOW_PITCH : 60;
+        if (this.#followPath) {
+            const futureDistance = this.#pathProgress * this.#pathLength + this.speed * duration / 1000
+            center = alongPath(this.path, futureDistance) as LngLatLike;
+            bearing = pathBearing(this.path, futureDistance) + (this.CAMERA_FOLLOW_BEARING - 180);
+        }
+
         getMap().flyTo({
-            center: this.object.coordinates,
-            zoom: 19,
+            center,
+            zoom: this.CAMERA_CLOSEUP_ZOOM,
             ...(rotate ? {
-                bearing: -this.object.rotation.z * 180 / Math.PI + 45,
-                pitch: 60,
+                bearing,
+                pitch,
             } : {}),
             duration,
         });
@@ -193,10 +210,14 @@ export class Truck extends EventTarget {
     /**
      * Attach the camera to the truck and follow it.
      * The camera is detached on user interaction
+     * @param smooth - Smoothly move the camera to the truck
      */
-    public follow() {
+    public async follow(smooth = false) {
         if (this.#cameraFollow || !this.#spawned || !this.#truck || !this.#followPath)
             return;
+
+        if (smooth)
+            await this.focus(true);
 
         this.#cameraFollow = true;
         this.dispatchEvent(new Event('cameraFollow'));
@@ -258,9 +279,9 @@ export class Truck extends EventTarget {
         if (this.#cameraFollow && position && rotation)
             getMap().jumpTo({
                 center: [ position[0], position[1] ],
-                zoom: 19,
-                bearing: -rotation.z * 180 / Math.PI + 185,
-                pitch: 70,
+                zoom: this.CAMERA_CLOSEUP_ZOOM,
+                bearing: -rotation.z * 180 / Math.PI + this.CAMERA_FOLLOW_BEARING,
+                pitch: this.CAMERA_FOLLOW_PITCH,
             });
     }
 
@@ -268,7 +289,7 @@ export class Truck extends EventTarget {
         if (!this.#followPath)
             this.focus();
         else
-            this.follow();
+            this.follow(true);
     }
 
     private onZoom() {
