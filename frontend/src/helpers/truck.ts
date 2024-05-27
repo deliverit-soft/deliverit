@@ -126,9 +126,9 @@ export class Truck extends EventTarget {
             return;
 
         await new Promise<void>(resolve => getThreebox().loadObj({
-            obj: '/truck.glb',
+            obj: '/commercial-truck.glb',
             type: 'gltf',
-            scale: 10,
+            scale: 0.06,
             units: 'meters',
             anchor: 'bottom',
             rotation: { x: 90, y: 90, z: 0 },
