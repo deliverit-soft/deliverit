@@ -1,14 +1,35 @@
 <script lang="ts">
     import { mapStore } from '../../resources/stores.ts';
-    import { DEFAULT_POSITION } from '../../resources/defaults.ts';
+    import { DEFAULT_POSITION, DEFAULT_ZOOM } from '../../resources/defaults.ts';
     import { Truck } from '../../helpers/truck.ts';
 
-    export function resetView() {
+    let isDefaultPosition = true;
+    let isDisabled = false;
+
+    $: $mapStore?.on('move', () => {
+        isDefaultPosition = false;
+    });
+
+    async function resetView() {
+        if (isDisabled)
+            return;
+
+        // Unfollow all trucks
+        isDisabled = true;
         Truck.unfollowAll();
+
+        // Reset view
+        $mapStore.setMinZoom(1);
         $mapStore.flyTo({
             ...DEFAULT_POSITION,
             duration: 1000,
         });
+        await new Promise(resolve => setTimeout(resolve, 1050));
+
+        // Reset variables
+        $mapStore.setMinZoom(DEFAULT_ZOOM);
+        isDefaultPosition = true;
+        isDisabled = false;
     }
 </script>
 
@@ -32,8 +53,16 @@
     button:hover {
         background-color: #e9ecef;
     }
+
+    button:disabled {
+        background-color: #f8f9fa;
+        color: #6c757d;
+        cursor: not-allowed;
+    }
 </style>
 
-<button on:click={resetView}>
-    Reset View
-</button>
+{#if !isDefaultPosition}
+    <button on:click={resetView} disabled={isDisabled}>
+        Reset View
+    </button>
+{/if}
