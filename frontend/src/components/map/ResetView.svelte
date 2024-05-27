@@ -2,20 +2,25 @@
     import { mapStore } from '../../resources/stores.ts';
     import { DEFAULT_POSITION, DEFAULT_ZOOM } from '../../resources/defaults.ts';
     import { Truck } from '../../helpers/truck.ts';
+    import { fade } from 'svelte/transition';
 
     let isDefaultPosition = true;
-    let isDisabled = false;
+    let cameraMoving = false;
 
     $: $mapStore?.on('move', () => {
+        if (cameraMoving)
+            return;
+
         isDefaultPosition = false;
     });
 
     async function resetView() {
-        if (isDisabled)
+        if (cameraMoving)
             return;
 
-        // Unfollow all trucks
-        isDisabled = true;
+        // Set variables and unfollow all trucks
+        cameraMoving = true;
+        isDefaultPosition = true;
         Truck.unfollowAll();
 
         // Reset view
@@ -28,8 +33,7 @@
 
         // Reset variables
         $mapStore.setMinZoom(DEFAULT_ZOOM);
-        isDefaultPosition = true;
-        isDisabled = false;
+        cameraMoving = false;
     }
 </script>
 
@@ -53,16 +57,10 @@
     button:hover {
         background-color: #e9ecef;
     }
-
-    button:disabled {
-        background-color: #f8f9fa;
-        color: #6c757d;
-        cursor: not-allowed;
-    }
 </style>
 
 {#if !isDefaultPosition}
-    <button on:click={resetView} disabled={isDisabled}>
+    <button on:click={resetView} transition:fade={{duration: 300}}>
         Reset View
     </button>
 {/if}
