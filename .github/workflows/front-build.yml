@@ -21,4 +21,4 @@ jobs:
         run: npm install --no-save --no-package-lock --no-audit --no-fund
 
       - name: Build
-        run: bun run build
+        run: npm run build
