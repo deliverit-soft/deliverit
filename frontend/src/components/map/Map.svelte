@@ -16,6 +16,7 @@
             style: PUBLIC_MAPBOX_STYLES,
             minZoom: DEFAULT_ZOOM,
             maxBounds: new mapboxgl.LngLatBounds([-7, 42], [10, 52]),
+            antialias: true,
             ...DEFAULT_POSITION,
         });
 
