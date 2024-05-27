@@ -1,8 +1,10 @@
 <script lang="ts">
     import { mapStore } from '../../resources/stores.ts';
     import { DEFAULT_POSITION } from '../../resources/defaults.ts';
+    import { Truck } from '../../helpers/truck.ts';
 
     export function resetView() {
+        Truck.unfollowAll();
         $mapStore.flyTo({
             ...DEFAULT_POSITION,
             duration: 1000,
