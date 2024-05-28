@@ -1,15 +1,33 @@
+:root {
+    --primary-black: #182939;
+    --primary-white: #fcfaf8;
+    --primary-theme: #9662E3;
+    --light-gray: #b8c1cc;
+    --dark-gray: #737880;
+    --shadow-md: 0 0 .5rem rgba(0, 0, 0, 0.5);
+    --shadow-sm: 0 0 .25rem rgba(0, 0, 0, 0.5);
+}
+
 body, html {
     /* page */
     margin: 0;
     padding: 0;
+    background: var(--primary-white);
     /* font */
     font-family: "Reddit Sans", sans-serif;
     font-optical-sizing: auto;
     font-weight: normal;
     font-style: normal;
     font-size: 1rem;
+    color: var(--primary-black);
 }
 
 input, button {
     font-family: inherit;
+    color: inherit;
+}
+
+::selection {
+    background: var(--primary-theme);
+    color: var(--primary-white);
 }
