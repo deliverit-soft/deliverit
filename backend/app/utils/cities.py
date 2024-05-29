@@ -45,6 +45,7 @@ def _build_index():
 
     docs = writer.commit()
     writer.wait_merging_threads()
+    _index.reload()
 
     print(f'Indexed {docs} cities in {time.time() - start:.2f}s')
 
