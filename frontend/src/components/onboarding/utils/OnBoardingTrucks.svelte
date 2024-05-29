@@ -1,5 +1,6 @@
 <script lang="ts">
     import { TruckData } from '../../../models/truck-data.ts';
+    import { fade } from 'svelte/transition';
 
     export let trucks: TruckData[] = [];
     export let index = 0;
@@ -97,7 +98,7 @@
 </style>
 
 
-<div class="truck-container">
+<div class="truck-container" transition:fade={{duration: 200}}>
     <h3>Group #{index + 1}</h3>
     <div class="truck-stats">
         <label>

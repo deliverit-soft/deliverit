@@ -2,6 +2,7 @@
     import { TruckData } from '../../models/truck-data.ts';
     import { PackageData } from '../../models/package-data.ts';
     import OnBoardingStepLayout from './utils/OnBoardingStepLayout.svelte';
+    import { fade } from 'svelte/transition';
 
     const { instancesStore: trucksInstances } = TruckData;
     const { instancesStore: packagesInstances } = PackageData;
@@ -86,7 +87,9 @@
     <div class="selected-packages">
         <div class="packages">
             {#each $packagesInstances as pack}
-                <div class="package">{pack.height}x{pack.width}x{pack.length}</div>
+                <div class="package" transition:fade={{duration: 200}}>
+                    {pack.height}x{pack.width}x{pack.length}
+                </div>
             {/each}
         </div>
     </div>

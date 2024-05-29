@@ -2,6 +2,7 @@
     import type { City } from '../../../models/city.ts';
     import { Icon, Trash } from 'svelte-hero-icons';
     import { createEventDispatcher } from 'svelte';
+    import { fade } from 'svelte/transition';
 
     export let city: City;
 
@@ -43,7 +44,7 @@
 </style>
 
 
-<div class="city">
+<div class="city" in:fade={{duration: 200}}>
     <div>
         {city.insee_code} {city.name}
     </div>
