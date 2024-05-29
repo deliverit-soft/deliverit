@@ -1,5 +1,5 @@
-import { Truck } from './truck';
-import { randint, range } from './utils.ts';
+import { Truck } from './truck.ts';
+import { randint, range } from '../helpers/utils.ts';
 import { writable } from 'svelte/store';
 
 export class TruckData {

@@ -5,7 +5,7 @@
     import { distanceBetween, getRoute } from '../../helpers/geo.ts';
     import type { Position } from 'geojson';
     import { type LngLatLike } from 'mapbox-gl';
-    import { Truck } from '../../helpers/truck.ts';
+    import { Truck } from '../../models/truck.ts';
     import PanelBrand from './PanelBrand.svelte';
 
     let isResizing = false;

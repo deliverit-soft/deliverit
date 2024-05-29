@@ -1,6 +1,6 @@
 <script lang="ts">
-    import { TruckData } from '../../helpers/truck-data.ts';
-    import { PackageData } from '../../helpers/package-data.ts';
+    import { TruckData } from '../../models/truck-data.ts';
+    import { PackageData } from '../../models/package-data.ts';
     import OnBoardingStepLayout from './utils/OnBoardingStepLayout.svelte';
 
     const { instancesStore: trucksInstances } = TruckData;

@@ -8,7 +8,7 @@ import type {
 } from 'threebox-plugin';
 import type { Position } from 'geojson';
 import { getMap, getThreebox } from '../resources/stores.ts';
-import { alongPath, chunkPath, pathBearing, pathLength, sliceAlongPath } from './geo.ts';
+import { alongPath, chunkPath, pathBearing, pathLength, sliceAlongPath } from '../helpers/geo.ts';
 import mapboxgl, { type LngLatLike } from 'mapbox-gl';
 
 export class Truck extends EventTarget {

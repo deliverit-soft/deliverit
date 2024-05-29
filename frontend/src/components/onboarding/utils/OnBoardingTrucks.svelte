@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { TruckData } from '../../../helpers/truck-data.ts';
+    import { TruckData } from '../../../models/truck-data.ts';
 
     export let trucks: TruckData[] = [];
     export let index = 0;

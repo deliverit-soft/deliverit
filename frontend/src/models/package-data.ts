@@ -1,5 +1,5 @@
 import { writable } from 'svelte/store';
-import { randint } from './utils.ts';
+import { randint } from '../helpers/utils.ts';
 
 export class PackageData {
     static readonly instances = new Set<PackageData>();
