@@ -1,9 +1,7 @@
 <script lang="ts">
-    import { createEventDispatcher } from 'svelte';
     import { TruckData } from '../../helpers/truck-data.ts';
     import { PackageData } from '../../helpers/package-data.ts';
-
-    const dispatch = createEventDispatcher();
+    import OnBoardingStepLayout from './utils/OnBoardingStepLayout.svelte';
 
     const { instancesStore: trucksInstances } = TruckData;
     const { instancesStore: packagesInstances } = PackageData;
@@ -35,28 +33,10 @@
 
         previousPackagesCount = packagesCount;
     }
-
-    function handleNext() {
-        dispatch('next');
-    }
 </script>
 
 
 <style>
-    .create-container {
-        width: 50.5rem;
-        height: 32rem;
-        position: relative;
-        display: flex;
-        flex-direction: column;
-        gap: 2rem;
-    }
-
-    h2 {
-        font-size: 2rem;
-        margin: 0;
-    }
-
     .chose-packages {
         width: 100%;
         display: flex;
@@ -94,33 +74,11 @@
         border-radius: .5rem;
         font-size: .8rem;
     }
-
-    .create-next {
-        display: flex;
-        justify-content: center;
-    }
-
-    .create-next button {
-        background-color: var(--primary-theme);
-        color: var(--primary-white);
-        border: none;
-        border-radius: .5rem;
-        padding: .5rem 1rem;
-        font-size: inherit;
-        cursor: pointer;
-    }
-
-    .create-next button:disabled {
-        background-color: var(--light-gray);
-        cursor: not-allowed;
-    }
 </style>
 
 
-<div class="create-container">
-    <h2>Setup packages</h2>
-
-    <div class="chose-packages">
+<OnBoardingStepLayout on:next title="Setup packages">
+    <div class="chose-packages" slot="controls">
         <input type="range" min={1} max={maxPackagesCount} step={1} bind:value={packagesCount}>
         <input type="number" min={1} max={maxPackagesCount} step={1} bind:value={packagesCount}>
     </div>
@@ -132,8 +90,4 @@
             {/each}
         </div>
     </div>
-
-    <div class="create-next">
-        <button disabled={false} on:click={handleNext}>Next</button>
-    </div>
-</div>
+</OnBoardingStepLayout>

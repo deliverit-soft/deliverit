@@ -2,9 +2,8 @@
     import { ArrowPath, Icon, Plus, Trash } from 'svelte-hero-icons';
     import { TruckData } from '../../helpers/truck-data.ts';
     import OnBoardingTrucks from './utils/OnBoardingTrucks.svelte';
-    import { createEventDispatcher, onMount } from 'svelte';
-
-    const dispatch = createEventDispatcher();
+    import OnBoardingStepLayout from './utils/OnBoardingStepLayout.svelte';
+    import { onMount } from 'svelte';
 
     onMount(() => {
         TruckData.destroyAll();
@@ -23,23 +22,10 @@
     function handleDeleteTrucks() {
         TruckData.destroyAll();
     }
-
-    function handleNext() {
-        dispatch('next');
-    }
 </script>
 
 
 <style>
-    .create-container {
-        width: 50.5rem;
-        height: 32rem;
-        position: relative;
-        display: flex;
-        flex-direction: column;
-        gap: 2rem;
-    }
-
     .create-header {
         display: flex;
         justify-content: space-between;
@@ -73,35 +59,15 @@
         display: flex;
         flex-wrap: wrap;
         gap: 1rem;
-        height: 100%;
+        height: calc(100% - .5rem);
         overflow: auto visible;
         padding: .25rem;
-    }
-
-    .create-next {
-        display: flex;
-        justify-content: center;
-    }
-
-    .create-next button {
-        background-color: var(--primary-theme);
-        color: var(--primary-white);
-        border: none;
-        border-radius: .5rem;
-        padding: .5rem 1rem;
-        font-size: inherit;
-        cursor: pointer;
-    }
-
-    .create-next button:disabled {
-        background-color: var(--light-gray);
-        cursor: not-allowed;
     }
 </style>
 
 
-<div class="create-container">
-    <div class="create-header">
+<OnBoardingStepLayout on:next nextDisabled={$instancesStore.length === 0}>
+    <div class="create-header" slot="title">
         <h2>
             Truck fleet
             {#if $instancesStore.length > 0}
@@ -126,8 +92,4 @@
             <OnBoardingTrucks {trucks} {index}/>
         {/each}
     </div>
-
-    <div class="create-next">
-        <button disabled={$instancesStore.length === 0} on:click={handleNext}>Next</button>
-    </div>
-</div>
+</OnBoardingStepLayout>
