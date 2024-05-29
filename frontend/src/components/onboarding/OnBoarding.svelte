@@ -2,9 +2,10 @@
     import OnBoardingMethodStep from './OnBoardingMethodStep.svelte';
     import OnBoardingInstanceCreateTrucks from './OnBoardingInstanceCreateTrucks.svelte';
     import OnBoardingInstanceCreatePackages from './OnBoardingInstanceCreatePackages.svelte';
+    import OnBoardingStartingCities from './OnBoardingStartingCities.svelte';
 
     type MethodChoice = 'import' | 'create' | 'history';
-    type Step = 'method' | 'import' | 'create-trucks' | 'create-packages' | 'history';
+    type Step = 'method' | 'import' | 'create-trucks' | 'create-packages' | 'start-cities' | 'history';
 
     let step: Step = 'method';
 
@@ -27,6 +28,10 @@
     }
 
     function handlePackagesCreated() {
+        step = 'start-cities';
+    }
+
+    function handleStartCitiesSet() {
         step = 'method';
     }
 </script>
@@ -66,6 +71,9 @@
         {/if}
         {#if step === 'create-packages'}
             <OnBoardingInstanceCreatePackages on:next={handlePackagesCreated}/>
+        {/if}
+        {#if step === 'start-cities'}
+            <OnBoardingStartingCities on:next={handleStartCitiesSet}/>
         {/if}
         {#if step === 'history'}
             <p>History</p>
