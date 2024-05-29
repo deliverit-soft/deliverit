@@ -1,14 +1,40 @@
 <script lang="ts">
     import { createEventDispatcher } from 'svelte';
     import { TruckData } from '../../helpers/truck-data.ts';
+    import { PackageData } from '../../helpers/package-data.ts';
 
     const dispatch = createEventDispatcher();
 
-    const { instancesStore } = TruckData;
-    let trucksCount: number = $instancesStore.length;
-    $: trucksCount = $instancesStore.length;
+    const { instancesStore: trucksInstances } = TruckData;
+    const { instancesStore: packagesInstances } = PackageData;
 
-    let chosenPackages: number = trucksCount * 10;
+    let trucksCount: number = $trucksInstances.length;
+    $: trucksCount = $trucksInstances.length;
+
+    const maxPackagesCount: number = trucksCount * 20;
+
+    let packagesCount: number = trucksCount * 10;
+    $: updatePackageCount(packagesCount);
+    let previousPackagesCount: number = $packagesInstances.length;
+
+    function updatePackageCount(_: number) {
+        packagesCount = Math.round(packagesCount);
+
+        if (packagesCount > maxPackagesCount)
+            packagesCount = maxPackagesCount;
+
+        if (packagesCount < 1)
+            packagesCount = 1;
+
+        if (packagesCount < previousPackagesCount)
+            [ ...PackageData.instances.values() ].slice(packagesCount).forEach(instance => instance.destroy());
+
+        if (packagesCount > previousPackagesCount)
+            for (let i = previousPackagesCount; i < packagesCount; i++)
+                PackageData.randomInstance();
+
+        previousPackagesCount = packagesCount;
+    }
 
     function handleNext() {
         dispatch('next');
@@ -51,6 +77,22 @@
 
     .selected-packages {
         height: 100%;
+        overflow-y: auto;
+    }
+
+    .packages {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        height: fit-content;
+    }
+
+    .package {
+        background-color: var(--light-gray);
+        color: var(--primary-white);
+        padding: .5rem 1rem;
+        border-radius: .5rem;
+        font-size: .8rem;
     }
 
     .create-next {
@@ -79,12 +121,16 @@
     <h2>Setup packages</h2>
 
     <div class="chose-packages">
-        <input type="range" min={1} max={trucksCount * 20} step={1} bind:value={chosenPackages}>
-        <input type="number" min={1} max={trucksCount * 20} step={1} bind:value={chosenPackages}>
+        <input type="range" min={1} max={maxPackagesCount} step={1} bind:value={packagesCount}>
+        <input type="number" min={1} max={maxPackagesCount} step={1} bind:value={packagesCount}>
     </div>
 
     <div class="selected-packages">
-
+        <div class="packages">
+            {#each $packagesInstances as pack}
+                <div class="package">{pack.height}x{pack.width}x{pack.length}</div>
+            {/each}
+        </div>
     </div>
 
     <div class="create-next">
