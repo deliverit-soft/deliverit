@@ -1,7 +1,7 @@
 <script lang="ts">
-    import { mapStore } from '../../resources/stores.ts';
-    import { DEFAULT_POSITION, DEFAULT_ZOOM } from '../../resources/defaults.ts';
-    import { Truck } from '../../models/truck.ts';
+    import { mapStore } from '$resources/stores.ts';
+    import { DEFAULT_POSITION, DEFAULT_ZOOM } from '$resources/defaults.ts';
+    import { Truck } from '$models/truck.ts';
     import { fade } from 'svelte/transition';
 
     let isDefaultPosition = true;

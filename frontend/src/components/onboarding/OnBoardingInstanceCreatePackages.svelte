@@ -1,6 +1,6 @@
 <script lang="ts">
-    import { TruckData } from '../../models/truck-data.ts';
-    import { PackageData } from '../../models/package-data.ts';
+    import { TruckData } from '$models/truck-data.ts';
+    import { PackageData } from '$models/package-data.ts';
     import OnBoardingStepLayout from './utils/OnBoardingStepLayout.svelte';
     import { fade } from 'svelte/transition';
 

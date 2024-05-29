@@ -1,11 +1,11 @@
 <script lang="ts">
-    import { mapStore } from '../../resources/stores.ts';
-    import { drawLine } from '../../helpers/draw.ts';
+    import { mapStore } from '$resources/stores.ts';
+    import { drawLine } from '$helpers/draw.ts';
     import cities from '../../resources/cities.json';
-    import { distanceBetween, getRoute } from '../../helpers/geo.ts';
+    import { distanceBetween, getRoute } from '$helpers/geo.ts';
     import type { Position } from 'geojson';
     import { type LngLatLike } from 'mapbox-gl';
-    import { Truck } from '../../models/truck.ts';
+    import { Truck } from '$models/truck.ts';
     import PanelBrand from './PanelBrand.svelte';
 
     let isResizing = false;

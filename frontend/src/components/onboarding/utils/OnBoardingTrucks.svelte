@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { TruckData } from '../../../models/truck-data.ts';
+    import { TruckData } from '$models/truck-data.ts';
     import { fade } from 'svelte/transition';
 
     export let trucks: TruckData[] = [];

@@ -1,5 +1,5 @@
 <script lang="ts">
-    import type { City } from '../../../models/city.ts';
+    import type { City } from '$models/city.ts';
     import { Icon, Trash } from 'svelte-hero-icons';
     import { createEventDispatcher } from 'svelte';
     import { fade } from 'svelte/transition';

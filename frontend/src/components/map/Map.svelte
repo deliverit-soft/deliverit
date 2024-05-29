@@ -2,8 +2,8 @@
     import mapboxgl from 'mapbox-gl';
     import 'mapbox-gl/dist/mapbox-gl.css';
     import { onDestroy, onMount } from 'svelte';
-    import { mapStore, threebox } from '../../resources/stores.ts';
-    import { DEFAULT_POSITION, DEFAULT_ZOOM } from '../../resources/defaults.ts';
+    import { mapStore, threebox } from '$resources/stores.ts';
+    import { DEFAULT_POSITION, DEFAULT_ZOOM } from '$resources/defaults.ts';
     import { Threebox } from 'threebox-plugin';
 
     const { PUBLIC_MAPBOX_TOKEN, PUBLIC_MAPBOX_STYLES } = import.meta.env;

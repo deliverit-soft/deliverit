@@ -1,6 +1,6 @@
 <script lang="ts">
     import { ArrowPath, Icon, Plus, Trash } from 'svelte-hero-icons';
-    import { TruckData } from '../../models/truck-data.ts';
+    import { TruckData } from '$models/truck-data.ts';
     import OnBoardingTrucks from './utils/OnBoardingTrucks.svelte';
     import OnBoardingStepLayout from './utils/OnBoardingStepLayout.svelte';
     import { onMount } from 'svelte';

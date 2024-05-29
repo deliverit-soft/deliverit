@@ -1,10 +1,10 @@
 <script lang="ts">
     import OnBoardingStepLayout from './utils/OnBoardingStepLayout.svelte';
     import { ArrowPath, Icon, Plus } from 'svelte-hero-icons';
-    import type { City } from '../../models/city.ts';
+    import type { City } from '$models/city.ts';
     import OnBoardingCity from './utils/OnBoardingCity.svelte';
-    import { TruckData } from '../../models/truck-data.js';
-    import { randint } from '../../helpers/utils.ts';
+    import { TruckData } from '$models/truck-data.ts';
+    import { randint } from '$helpers/utils.ts';
 
     let cities: City[] = [];
     let loading = false;
