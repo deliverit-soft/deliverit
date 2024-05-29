@@ -38,6 +38,6 @@ def random_cities():
         selected_cities.append(cities['features'][random.randint(0, cities_count - 1)])
 
     return jsonify(list({
-        "insee_code": city['properties']['INSEE_COMM'],
+        "insee_code": int(city['properties']['INSEE_COMM']),
         "name": city['properties']['NOM_COMM'],
     } for city in selected_cities))
