@@ -36,7 +36,7 @@
     }
 
     .onboarding-choice:hover {
-        box-shadow: var(--shadow-md);
+        box-shadow: var(--shadow-md-theme);
         transform: scale(1.05);
     }
 </style>
