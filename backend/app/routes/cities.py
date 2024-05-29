@@ -1,6 +1,6 @@
 import random
 from flask import request, jsonify, Blueprint
-from app.utils import utils
+from app.utils.utils import to_ascii, clamp
 from app.utils.cities import get_cities, get_index
 
 
@@ -10,8 +10,8 @@ cities_bp = Blueprint("cities", __name__)
 @cities_bp.route("/api/cities/search")
 def cities_search():
     user_query = request.args.get("query")
-    user_query = utils.to_ascii(user_query)
-    limit = int(request.args.get("limit", 10))
+    user_query = to_ascii(user_query)
+    limit = clamp(int(request.args.get("limit", 10)), 1, 100)
 
     searcher = get_index().searcher()
     query = get_index().parse_query(user_query)
@@ -29,12 +29,16 @@ def cities_search():
 
 @cities_bp.route("/api/cities/random")
 def random_cities():
-    count = int(request.args.get("limit", 1))
-    cities_count = max(1, min(len(get_cities()['features']), 100))
+    limit = clamp(int(request.args.get("limit", 1)), 1, 100)
+    cities_count = clamp(len(get_cities()['features']), 1, 100)
 
     selected_cities = list()
-    while len(selected_cities) < count:
-        selected_cities.append(get_cities()['features'][random.randint(0, cities_count - 1)])
+    tries = 0
+    while len(selected_cities) < limit and tries < limit * 2:
+        random_city = get_cities()['features'][random.randint(0, cities_count - 1)]
+        if random_city not in selected_cities:
+            selected_cities.append(random_city)
+        tries += 1
 
     return jsonify(list({
         "insee_code": int(city['properties']['INSEE_COMM']),
