@@ -2,31 +2,62 @@ import json
 import tantivy
 import time
 from .utils import to_ascii
+from .types import GeoJson
+from typing import Optional
 
-start = time.time()
+_cities: Optional[GeoJson] = None
+_index: Optional[tantivy.Index] = None
 
-# Create schema
-schema_builder = tantivy.SchemaBuilder()
-schema_builder.add_text_field("insee_code", stored=True)
-schema_builder.add_text_field("ascii_name", stored=True)
-schema_builder.add_text_field("name", stored=True)
-schema = schema_builder.build()
 
-# Create index
-index = tantivy.Index(schema)
+def _load_cities():
+    global _cities
+    with open("./resources/cities.geojson", "r", encoding="utf-8") as f:
+        _cities = json.load(f)
 
-# Load from JSON file
-with open("./resources/cities.geojson", "r", encoding="utf-8") as f:
-    cities = json.load(f)
 
-# Index cities
-writer = index.writer()
-for city in cities['features']:
-    writer.add_document(tantivy.Document(
-        insee_code=city['properties']["INSEE_COMM"],
-        ascii_name=to_ascii(city['properties']["NOM_COMM"]),
-        name=city['properties']["NOM_COMM"]
-    ))
-writer.commit()
+def _build_index():
+    global _index, _cities
 
-print(f'Indexed {len(cities["features"])} cities in {time.time() - start:.2f}s')
+    start = time.time()
+
+    # Create schema
+    schema_builder = tantivy.SchemaBuilder()
+    schema_builder.add_text_field("insee_code", stored=True)
+    schema_builder.add_text_field("ascii_name", stored=True)
+    schema_builder.add_text_field("name", stored=True)
+    schema = schema_builder.build()
+
+    # Create index
+    _index = tantivy.Index(schema)
+
+    # Load from JSON file
+    with open("./resources/cities.geojson", "r", encoding="utf-8") as f:
+        _cities = json.load(f)
+
+    # Index cities
+    writer = _index.writer()
+    for city in _cities['features']:
+        writer.add_document(tantivy.Document(
+            insee_code=city['properties']["INSEE_COMM"],
+            ascii_name=to_ascii(city['properties']["NOM_COMM"]),
+            name=city['properties']["NOM_COMM"]
+        ))
+
+    docs = writer.commit()
+    writer.wait_merging_threads()
+
+    print(f'Indexed {docs} cities in {time.time() - start:.2f}s')
+
+
+def get_cities() -> GeoJson:
+    global _cities
+    if _cities is None:
+        _load_cities()
+    return _cities
+
+
+def get_index() -> tantivy.Index:
+    global _index
+    if _index is None:
+        _build_index()
+    return _index
