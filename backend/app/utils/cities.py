@@ -1,7 +1,7 @@
 import json
 import tantivy
 import time
-from utils.utils import to_ascii
+from .utils import to_ascii
 
 start = time.time()
 
