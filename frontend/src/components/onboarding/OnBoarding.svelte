@@ -1,9 +1,10 @@
 <script lang="ts">
     import OnBoardingMethodStep from './OnBoardingMethodStep.svelte';
     import OnBoardingInstanceCreateTrucks from './OnBoardingInstanceCreateTrucks.svelte';
+    import OnBoardingInstanceCreatePackages from './OnBoardingInstanceCreatePackages.svelte';
 
     type MethodChoice = 'import' | 'create' | 'history';
-    type Step = 'method' | 'import' | 'create-trucks' | 'history';
+    type Step = 'method' | 'import' | 'create-trucks' | 'create-packages' | 'history';
 
     let step: Step = 'method';
 
@@ -22,6 +23,10 @@
     }
 
     function handleTrucksCreated() {
+        step = 'create-packages';
+    }
+
+    function handlePackagesCreated() {
         step = 'method';
     }
 </script>
@@ -58,6 +63,9 @@
         {/if}
         {#if step === 'create-trucks'}
             <OnBoardingInstanceCreateTrucks on:next={handleTrucksCreated}/>
+        {/if}
+        {#if step === 'create-packages'}
+            <OnBoardingInstanceCreatePackages on:next={handlePackagesCreated}/>
         {/if}
         {#if step === 'history'}
             <p>History</p>
