@@ -8,3 +8,11 @@ export async function getRandomCities(limit = 1) {
     const response = await fetch(url);
     return response.json() as Promise<City[]>;
 }
+
+export async function searchCities(query: string, limit = 5) {
+    const url = new URL('/api/cities/search', baseUrl);
+    url.searchParams.append('query', query);
+    url.searchParams.append('limit', limit.toString());
+    const response = await fetch(url);
+    return response.json() as Promise<City[]>;
+}

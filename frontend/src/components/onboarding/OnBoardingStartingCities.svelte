@@ -6,14 +6,29 @@
     import { TruckData } from '$models/truck-data.ts';
     import { getRandomCities } from '$helpers/api.ts';
     import { randint } from '$helpers/utils.ts';
+    import CitySearchPopup from '$components/onboarding/utils/CitySearchPopup.svelte';
 
     let cities: City[] = [];
     let loading = false;
 
+    let showPopup = false;
+
     const truckCount = TruckData.instances.size;
 
-    function handleNewCity() {
+    function handleCitySelect(ev: CustomEvent<City>) {
+        closePopup();
 
+        if (cities.find(city => city.insee_code === ev.detail.insee_code))
+            return;
+        cities = [ ...cities, ev.detail ];
+    }
+
+    function closePopup() {
+        showPopup = false;
+    }
+
+    function handleNewCity() {
+        showPopup = true;
     }
 
     async function handleRandomCities() {
@@ -95,3 +110,7 @@
         {/each}
     </div>
 </OnBoardingStepLayout>
+
+{#if showPopup}
+    <CitySearchPopup on:select={handleCitySelect} on:close={closePopup}/>
+{/if}
