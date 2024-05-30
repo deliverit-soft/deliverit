@@ -3,24 +3,30 @@
     import { ArrowPath, Icon, Plus } from 'svelte-hero-icons';
     import type { City } from '$models/city.ts';
     import OnBoardingCity from './utils/OnBoardingCity.svelte';
-    import { TruckData } from '$models/truck-data.ts';
     import { getRandomCities } from '$helpers/api.ts';
     import { randint } from '$helpers/utils.ts';
     import CitySearchPopup from '$components/onboarding/utils/CitySearchPopup.svelte';
+    import { onMount } from 'svelte';
+    import type { Writable } from 'svelte/store';
 
-    let cities: City[] = [];
+    export let title = 'Cities';
+    export let cityStore: Writable<City[]>;
+    export let min = 1;
+    export let max = 1;
+
+    onMount(() => {
+        $cityStore = [];
+    });
+
     let loading = false;
-
     let showPopup = false;
-
-    const truckCount = TruckData.instances.size;
 
     function handleCitySelect(ev: CustomEvent<City>) {
         closePopup();
 
-        if (cities.find(city => city.insee_code === ev.detail.insee_code))
+        if ($cityStore.find(city => city.insee_code === ev.detail.insee_code))
             return;
-        cities = [ ...cities, ev.detail ];
+        $cityStore = [ ...$cityStore, ev.detail ];
     }
 
     function closePopup() {
@@ -33,12 +39,12 @@
 
     async function handleRandomCities() {
         loading = true;
-        cities = await getRandomCities(randint(1, truckCount));
+        $cityStore = await getRandomCities(randint(min, max));
         loading = false;
     }
 
     function handleCityDelete(ev: CustomEvent<string>) {
-        cities = cities.filter(city => city.insee_code !== ev.detail);
+        $cityStore = $cityStore.filter(city => city.insee_code !== ev.detail);
     }
 </script>
 
@@ -91,11 +97,12 @@
 </style>
 
 
-<OnBoardingStepLayout on:next nextDisabled={cities.length === 0}>
+<OnBoardingStepLayout on:next nextDisabled={$cityStore.length < min || $cityStore.length > max}>
     <div class="create-header" slot="title">
-        <h2>Starting cities</h2>
+        <h2>{title} ({$cityStore.length} / {max})</h2>
         <div>
-            <button on:click={handleNewCity} disabled={loading || cities.length >= truckCount}>
+            <button on:click={handleNewCity}
+                    disabled={loading || $cityStore.length >= max}>
                 <Icon src={Plus} size="1.5rem"/>
             </button>
             <button on:click={handleRandomCities} disabled={loading} class="spinner">
@@ -105,7 +112,7 @@
     </div>
 
     <div class="cities">
-        {#each cities as city}
+        {#each $cityStore as city}
             <OnBoardingCity {city} on:delete={handleCityDelete}/>
         {/each}
     </div>

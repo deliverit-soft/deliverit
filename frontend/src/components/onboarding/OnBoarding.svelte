@@ -2,10 +2,13 @@
     import OnBoardingMethodStep from './OnBoardingMethodStep.svelte';
     import OnBoardingInstanceCreateTrucks from './OnBoardingInstanceCreateTrucks.svelte';
     import OnBoardingInstanceCreatePackages from './OnBoardingInstanceCreatePackages.svelte';
-    import OnBoardingStartingCities from './OnBoardingStartingCities.svelte';
+    import OnBoardingCities from './OnBoardingCities.svelte';
+    import { citiesToTour, startCities } from '$resources/stores.ts';
+    import { TruckData } from '$models/truck-data.ts';
+    import { PackageData } from '$models/package-data.ts';
 
     type MethodChoice = 'import' | 'create' | 'history';
-    type Step = 'method' | 'import' | 'create-trucks' | 'create-packages' | 'start-cities' | 'history';
+    type Step = 'method' | 'import' | 'create-trucks' | 'create-packages' | 'start-cities' | 'cities' | 'history';
 
     let step: Step = 'method';
 
@@ -32,6 +35,10 @@
     }
 
     function handleStartCitiesSet() {
+        step = 'cities';
+    }
+
+    function handleCitiesSet() {
         step = 'method';
     }
 </script>
@@ -73,7 +80,19 @@
             <OnBoardingInstanceCreatePackages on:next={handlePackagesCreated}/>
         {/if}
         {#if step === 'start-cities'}
-            <OnBoardingStartingCities on:next={handleStartCitiesSet}/>
+            <OnBoardingCities
+                    title="Starting cities"
+                    cityStore={startCities}
+                    max={TruckData.instances.size}
+                    on:next={handleStartCitiesSet}/>
+        {/if}
+        {#if step === 'cities'}
+            <OnBoardingCities
+                    title="Cities to visit"
+                    cityStore={citiesToTour}
+                    min={PackageData.instances.size}
+                    max={PackageData.instances.size}
+                    on:next={handleCitiesSet}/>
         {/if}
         {#if step === 'history'}
             <p>History</p>
