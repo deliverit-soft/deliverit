@@ -26,10 +26,14 @@
     }
 
     function selectCity(index = -1) {
+        let choice: City | undefined;
         if (index !== -1)
-            dispatch('select', cities[index]);
+            choice = cities[index];
         else
-            dispatch('select', cities[Math.max(selectedIndex, 0)]);
+            choice = cities[Math.max(selectedIndex, 0)];
+
+        if (choice)
+            dispatch('select', choice);
     }
 
     function handleKeyDown(ev: KeyboardEvent) {
