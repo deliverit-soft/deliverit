@@ -4,6 +4,7 @@
     import type { City } from '$models/city.ts';
     import OnBoardingCity from './utils/OnBoardingCity.svelte';
     import { TruckData } from '$models/truck-data.ts';
+    import { getRandomCities } from '$helpers/api.ts';
     import { randint } from '$helpers/utils.ts';
 
     let cities: City[] = [];
@@ -17,12 +18,7 @@
 
     async function handleRandomCities() {
         loading = true;
-
-        const url = new URL('/api/cities/random', import.meta.env.PUBLIC_API_URL);
-        url.searchParams.append('limit', String(randint(1, truckCount)));
-
-        cities = await fetch(url).then(res => res.json() as Promise<City[]>);
-
+        cities = await getRandomCities(randint(1, truckCount));
         loading = false;
     }
 
@@ -66,7 +62,7 @@
         background-color: var(--light-gray);
         cursor: not-allowed;
     }
-    
+
     .create-header button.spinner:disabled {
         cursor: progress;
     }
