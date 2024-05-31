@@ -5,6 +5,10 @@
     import OnBoardingCities from './OnBoardingCities.svelte';
     import { binPackingResult, citiesToTour, startCities } from '$resources/stores.ts';
     import OnBoardingBinPacking from '$components/onboarding/OnBoardingBinPacking.svelte';
+    import { createEventDispatcher } from 'svelte';
+    import { fade } from 'svelte/transition';
+
+    const dispatch = createEventDispatcher();
 
     type MethodChoice = 'import' | 'create' | 'history';
     type Step =
@@ -50,7 +54,7 @@
     }
 
     function handleCitiesSet() {
-        step = 'method';
+        dispatch('done');
     }
 </script>
 
@@ -76,7 +80,7 @@
 </style>
 
 
-<div class="onboarding-container">
+<div class="onboarding-container" out:fade={{duration: 200}}>
     <div class="onboarding-popup">
         {#if step === "method"}
             <OnBoardingMethodStep on:choice={handleMethodChoice}/>
