@@ -121,7 +121,6 @@ def place_packages_in_truck(trucks, packages):
 
                                 placed = True
                                 package_in_fleet[index] += 1
-                                print()
 
                                 break  # Break the loop once the packages is placed
                 index += 1
