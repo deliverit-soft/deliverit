@@ -3,9 +3,7 @@
     import OnBoardingInstanceCreateTrucks from './OnBoardingInstanceCreateTrucks.svelte';
     import OnBoardingInstanceCreatePackages from './OnBoardingInstanceCreatePackages.svelte';
     import OnBoardingCities from './OnBoardingCities.svelte';
-    import { citiesToTour, startCities } from '$resources/stores.ts';
-    import { TruckData } from '$models/truck-data.ts';
-    import { PackageData } from '$models/package-data.ts';
+    import { binPackingResult, citiesToTour, startCities } from '$resources/stores.ts';
     import OnBoardingBinPacking from '$components/onboarding/OnBoardingBinPacking.svelte';
 
     type MethodChoice = 'import' | 'create' | 'history';
@@ -99,15 +97,15 @@
             <OnBoardingCities
                     title="Starting cities"
                     cityStore={startCities}
-                    max={TruckData.instances.size}
+                    max={$binPackingResult.trucksUsed}
                     on:next={handleStartCitiesSet}/>
         {/if}
         {#if step === 'cities'}
             <OnBoardingCities
                     title="Cities to visit"
                     cityStore={citiesToTour}
-                    min={PackageData.instances.size}
-                    max={PackageData.instances.size}
+                    min={$binPackingResult.packagesPlaced}
+                    max={$binPackingResult.packagesPlaced}
                     on:next={handleCitiesSet}/>
         {/if}
         {#if step === 'history'}
