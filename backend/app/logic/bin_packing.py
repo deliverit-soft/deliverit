@@ -126,7 +126,7 @@ def place_packages_in_truck(trucks, packages):
                                 break  # Break the loop once the packages is placed
                 index += 1
 
-            if not placed and len(truck_fleet) != len(trucks):
+            if not placed and len(trucks) != 0:
 
                 for types in range(len(trucks)):
 
