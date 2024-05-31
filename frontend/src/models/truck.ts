@@ -8,7 +8,7 @@ import type {
 } from 'threebox-plugin';
 import type { Position } from 'geojson';
 import { getMap, getThreebox } from '../resources/stores.ts';
-import { alongPath, chunkPath, pathBearing, pathLength, sliceAlongPath } from './geo.ts';
+import { alongPath, chunkPath, pathBearing, pathLength, sliceAlongPath } from '../helpers/geo.ts';
 import mapboxgl, { type LngLatLike } from 'mapbox-gl';
 
 export class Truck extends EventTarget {
@@ -40,6 +40,7 @@ export class Truck extends EventTarget {
     // Instances
     #truck: ThreeboxObject | null = null;
     readonly #marker: mapboxgl.Marker | null = null;
+    static readonly #trucks: Map<string, Truck> = new Map();
 
     constructor(config: TruckConfig) {
         super();
@@ -48,6 +49,7 @@ export class Truck extends EventTarget {
         this.markerColor = config.markerColor ?? this.markerColor;
         this.#zoomMarkerThreshold = config.zoomMarkerThreshold ?? this.#zoomMarkerThreshold;
         this.#autoCameraFollow = config.autoCameraFollow ?? this.#autoCameraFollow;
+        Truck.#trucks.set(this.#id, this);
 
         if (this.enableMarker) {
             this.#marker = new mapboxgl.Marker({
@@ -97,6 +99,10 @@ export class Truck extends EventTarget {
     /** Get truck speed (m/s) */
     public get speed() {
         return this.#speed;
+    }
+
+    public static get instances() {
+        return Truck.#trucks;
     }
 
     /** Set truck speed (m/s) */
@@ -175,6 +181,7 @@ export class Truck extends EventTarget {
         getThreebox().remove(this.object);
         this.#spawned = false;
         this.dispatchEvent(new Event('destroy'));
+        Truck.#trucks.delete(this.#id);
     }
 
     // Methods
@@ -190,7 +197,7 @@ export class Truck extends EventTarget {
         let bearing = -this.object.rotation.z * 180 / Math.PI + 45;
         const pitch = this.#followPath ? this.CAMERA_FOLLOW_PITCH : 60;
         if (this.#followPath) {
-            const futureDistance = this.#pathProgress * this.#pathLength + this.speed * duration / 1000
+            const futureDistance = this.#pathProgress * this.#pathLength + this.speed * duration / 1000;
             center = alongPath(this.path, futureDistance) as LngLatLike;
             bearing = pathBearing(this.path, futureDistance) + (this.CAMERA_FOLLOW_BEARING - 180);
         }
@@ -228,11 +235,19 @@ export class Truck extends EventTarget {
     }
 
     public unfollow() {
+        if (!this.#cameraFollow)
+            return;
+
         this.#cameraFollow = false;
         this.dispatchEvent(new Event('cameraUnfollow'));
         getMap().off('mousedown', this.unfollow.bind(this));
         getMap().off('wheel', this.unfollow.bind(this));
         getMap().off('touchstart', this.unfollow.bind(this));
+    }
+
+    public static unfollowAll() {
+        for (const truck of Truck.#trucks.values())
+            truck.unfollow();
     }
 
     public async followPath(path: Position[]): Promise<void> {

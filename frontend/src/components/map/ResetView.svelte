@@ -1,12 +1,39 @@
 <script lang="ts">
-    import { mapStore } from '../../resources/stores.ts';
-    import { DEFAULT_POSITION } from '../../resources/defaults.ts';
+    import { mapStore } from '$resources/stores.ts';
+    import { DEFAULT_POSITION, DEFAULT_ZOOM } from '$resources/defaults.ts';
+    import { Truck } from '$models/truck.ts';
+    import { fade } from 'svelte/transition';
 
-    export function resetView() {
+    let isDefaultPosition = true;
+    let cameraMoving = false;
+
+    $: $mapStore?.on('move', () => {
+        if (cameraMoving)
+            return;
+
+        isDefaultPosition = false;
+    });
+
+    async function resetView() {
+        if (cameraMoving)
+            return;
+
+        // Set variables and unfollow all trucks
+        cameraMoving = true;
+        isDefaultPosition = true;
+        Truck.unfollowAll();
+
+        // Reset view
+        $mapStore.setMinZoom(1);
         $mapStore.flyTo({
             ...DEFAULT_POSITION,
             duration: 1000,
         });
+        await new Promise(resolve => setTimeout(resolve, 1050));
+
+        // Reset variables
+        $mapStore.setMinZoom(DEFAULT_ZOOM);
+        cameraMoving = false;
     }
 </script>
 
@@ -32,6 +59,8 @@
     }
 </style>
 
-<button on:click={resetView}>
-    Reset View
-</button>
+{#if !isDefaultPosition}
+    <button on:click={resetView} transition:fade={{duration: 300}}>
+        Reset View
+    </button>
+{/if}

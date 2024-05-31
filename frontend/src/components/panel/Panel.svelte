@@ -1,16 +1,17 @@
 <script lang="ts">
-    import { mapStore } from '../../resources/stores.ts';
-    import { drawLine } from '../../helpers/draw.ts';
+    import { mapStore } from '$resources/stores.ts';
+    import { drawLine } from '$helpers/draw.ts';
     import cities from '../../resources/cities.json';
-    import { distanceBetween, getRoute } from '../../helpers/geo.ts';
+    import { distanceBetween, getRoute } from '$helpers/geo.ts';
     import type { Position } from 'geojson';
     import { type LngLatLike } from 'mapbox-gl';
-    import { Truck } from '../../helpers/truck.ts';
+    import { Truck } from '$models/truck.ts';
+    import PanelBrand from './PanelBrand.svelte';
 
     let isResizing = false;
     let panel: HTMLElement;
-    const minWidth = 50;
-    const maxWidth = 800;
+    const minWidth = 300;
+    const maxWidth = 500;
 
     function handleResizeStart() {
         isResizing = true;
@@ -133,6 +134,7 @@
 <svelte:body on:mousemove={handleMouseMove} on:mouseup={handleResizeEnd}/>
 
 <aside bind:this={panel}>
+    <PanelBrand/>
     <button on:click={handleTsp}>Start TSP</button>
     {#if tspState}
         {tspState}

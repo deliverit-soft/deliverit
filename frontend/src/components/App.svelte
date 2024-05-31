@@ -2,6 +2,7 @@
     import Map from "./map/Map.svelte";
     import ResetView from "./map/ResetView.svelte";
     import Panel from "./panel/Panel.svelte";
+    import OnBoarding from "./onboarding/OnBoarding.svelte";
 </script>
 
 <style>
@@ -20,6 +21,7 @@
 </style>
 
 <main>
+    <OnBoarding/>
     <Panel/>
     <div class="map-container">
         <Map/>
