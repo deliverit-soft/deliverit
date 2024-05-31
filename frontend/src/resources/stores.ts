@@ -3,6 +3,7 @@ import mapboxgl from 'mapbox-gl';
 import Directions, { type DirectionsService } from '@mapbox/mapbox-sdk/services/directions';
 import type { Threebox } from 'threebox-plugin';
 import type { City } from '$models/city.ts';
+import type { BinPackingResult } from '$models/bin-packing.ts';
 
 const storeToValue = <T>(store: Writable<T> | Readable<T>): T => get(store);
 
@@ -19,3 +20,5 @@ export const getDirectionsClient = () => storeToValue(directionsClient);
 
 export const startCities = writable<City[]>([]);
 export const citiesToTour = writable<City[]>([]);
+
+export const binPackingResult = writable<BinPackingResult>();

@@ -6,9 +6,18 @@
     import { citiesToTour, startCities } from '$resources/stores.ts';
     import { TruckData } from '$models/truck-data.ts';
     import { PackageData } from '$models/package-data.ts';
+    import OnBoardingBinPacking from '$components/onboarding/OnBoardingBinPacking.svelte';
 
     type MethodChoice = 'import' | 'create' | 'history';
-    type Step = 'method' | 'import' | 'create-trucks' | 'create-packages' | 'start-cities' | 'cities' | 'history';
+    type Step =
+        'method'
+        | 'import'
+        | 'create-trucks'
+        | 'create-packages'
+        | 'bin-packing'
+        | 'start-cities'
+        | 'cities'
+        | 'history';
 
     let step: Step = 'method';
 
@@ -31,6 +40,10 @@
     }
 
     function handlePackagesCreated() {
+        step = 'bin-packing';
+    }
+
+    function handleBinPacking() {
         step = 'start-cities';
     }
 
@@ -75,6 +88,9 @@
         {/if}
         {#if step === 'create-trucks'}
             <OnBoardingInstanceCreateTrucks on:next={handleTrucksCreated}/>
+        {/if}
+        {#if step === 'bin-packing'}
+            <OnBoardingBinPacking on:next={handleBinPacking}/>
         {/if}
         {#if step === 'create-packages'}
             <OnBoardingInstanceCreatePackages on:next={handlePackagesCreated}/>

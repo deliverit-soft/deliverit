@@ -107,4 +107,14 @@ export class TruckData {
         TruckData.instancesStore.set([ ...TruckData.instances ]);
         TruckData.groupedInstancesStore.set(TruckData.groupedInstances);
     }
+
+    // Transformers
+
+    toObject() {
+        return {
+            width: this.width,
+            length: this.length,
+            height: this.height,
+        };
+    }
 }
