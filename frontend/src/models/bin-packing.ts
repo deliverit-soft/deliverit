@@ -2,8 +2,11 @@ export type BinPackingMatrix = number[][][][];
 
 export interface BinPackingResult {
     matrix: BinPackingMatrix;
-    packagesCount: number[];
+    packageCountPerTruck: number[];
+    packagesPlaced: number;
     trucksUsed: number;
+    totalSlots: number;
+    slotsUsed: number;
 }
 
 export interface BinPackingRawResponse {

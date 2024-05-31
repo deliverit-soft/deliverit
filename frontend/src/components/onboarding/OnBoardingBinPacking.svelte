@@ -9,12 +9,11 @@
     import { cubicInOut } from 'svelte/easing';
     import { binPackingResult } from '$resources/stores.ts';
 
-    let trucksSlots = 0;
     let usedTrucks = tweened(0, {
         duration: 1000,
         easing: cubicInOut,
     });
-    let packagesUsed = tweened(0, {
+    let packagesPlaced = tweened(0, {
         duration: 1000,
         easing: cubicInOut,
     });
@@ -28,9 +27,8 @@
 
         await new Promise((resolve) => setTimeout(resolve, 300));
 
-        $slotsUsed = $binPackingResult.matrix.flat(3).filter(Boolean).length ?? 0;
-        trucksSlots = $binPackingResult.matrix.flat(3).length ?? 0;
-        $packagesUsed = $binPackingResult.packagesCount?.reduce((acc, val) => acc + val, 0) ?? 0;
+        $slotsUsed = $binPackingResult.slotsUsed;
+        $packagesPlaced = $binPackingResult.packagesPlaced;
         $usedTrucks = $binPackingResult.trucksUsed ?? 0;
     });
 </script>
@@ -81,15 +79,15 @@
                 </p>
                 <progress value={$usedTrucks} max={TruckData.instances.size}/>
                 <p>
-                    Placed packages: {Math.round($packagesUsed)} / {PackageData.instances.size}
-                    ({Math.round($packagesUsed / PackageData.instances.size * 100)}%)
+                    Placed packages: {Math.round($packagesPlaced)} / {PackageData.instances.size}
+                    ({Math.round($packagesPlaced / PackageData.instances.size * 100)}%)
                 </p>
-                <progress value={$packagesUsed} max={PackageData.instances.size}/>
+                <progress value={$packagesPlaced} max={PackageData.instances.size}/>
                 <p>
-                    Truck slots used : {Math.round($slotsUsed)}/{trucksSlots}
-                    ({Math.round($slotsUsed / trucksSlots * 100)}%)
+                    Truck slots used : {Math.round($slotsUsed)}/{$binPackingResult.totalSlots}
+                    ({Math.round($slotsUsed / $binPackingResult.totalSlots * 100)}%)
                 </p>
-                <progress value={$slotsUsed} max={trucksSlots}/>
+                <progress value={$slotsUsed} max={$binPackingResult.totalSlots}/>
             </div>
         </div>
     {/if}

@@ -39,7 +39,10 @@ export async function binPacking(trucks: TruckData[], packages: PackageData[]): 
     const data = await response.json() as BinPackingRawResponse;
     return {
         matrix: data.matrix,
-        packagesCount: data.package_count,
+        packageCountPerTruck: data.package_count,
+        packagesPlaced: data.package_count.reduce((a, b) => a + b, 0),
         trucksUsed: data.trucks_used,
+        totalSlots: data.matrix.flat(3).length,
+        slotsUsed: data.matrix.flat(3).filter(Boolean).length,
     };
 }
