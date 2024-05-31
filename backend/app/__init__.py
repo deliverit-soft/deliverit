@@ -9,8 +9,9 @@ def create_app():
     if app.config.get('ENV', 'production') == "development" or app.config.get('DEBUG', False):
         CORS(app)
 
-    from .routes import cities
+    from .routes import cities, logic
 
     app.register_blueprint(cities.cities_bp)
+    app.register_blueprint(logic.logic_bp)
 
     return app
