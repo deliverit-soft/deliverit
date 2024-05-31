@@ -24,12 +24,9 @@
 
     onMount(async () => {
         $binPackingResult = await binPacking([ ...TruckData.instances ], [ ...PackageData.instances ]);
-
-        await new Promise((resolve) => setTimeout(resolve, 300));
-
         $slotsUsed = $binPackingResult.slotsUsed;
         $packagesPlaced = $binPackingResult.packagesPlaced;
-        $usedTrucks = $binPackingResult.trucksUsed ?? 0;
+        $usedTrucks = $binPackingResult.trucksUsed;
     });
 </script>
 
