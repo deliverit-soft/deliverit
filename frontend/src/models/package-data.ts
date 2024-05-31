@@ -42,4 +42,14 @@ export class PackageData {
         PackageData.instances.delete(this);
         PackageData.instancesStore.set([ ...PackageData.instances ]);
     }
+
+    // Transformers
+
+    toObject() {
+        return {
+            width: this.width,
+            length: this.length,
+            height: this.height,
+        };
+    }
 }

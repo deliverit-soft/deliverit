@@ -3,12 +3,23 @@
     import OnBoardingInstanceCreateTrucks from './OnBoardingInstanceCreateTrucks.svelte';
     import OnBoardingInstanceCreatePackages from './OnBoardingInstanceCreatePackages.svelte';
     import OnBoardingCities from './OnBoardingCities.svelte';
-    import { citiesToTour, startCities } from '$resources/stores.ts';
-    import { TruckData } from '$models/truck-data.ts';
-    import { PackageData } from '$models/package-data.ts';
+    import { binPackingResult, citiesToTour, startCities } from '$resources/stores.ts';
+    import OnBoardingBinPacking from '$components/onboarding/OnBoardingBinPacking.svelte';
+    import { createEventDispatcher } from 'svelte';
+    import { fade } from 'svelte/transition';
+
+    const dispatch = createEventDispatcher();
 
     type MethodChoice = 'import' | 'create' | 'history';
-    type Step = 'method' | 'import' | 'create-trucks' | 'create-packages' | 'start-cities' | 'cities' | 'history';
+    type Step =
+        'method'
+        | 'import'
+        | 'create-trucks'
+        | 'create-packages'
+        | 'bin-packing'
+        | 'start-cities'
+        | 'cities'
+        | 'history';
 
     let step: Step = 'method';
 
@@ -31,6 +42,10 @@
     }
 
     function handlePackagesCreated() {
+        step = 'bin-packing';
+    }
+
+    function handleBinPacking() {
         step = 'start-cities';
     }
 
@@ -39,7 +54,7 @@
     }
 
     function handleCitiesSet() {
-        step = 'method';
+        dispatch('done');
     }
 </script>
 
@@ -65,7 +80,7 @@
 </style>
 
 
-<div class="onboarding-container">
+<div class="onboarding-container" out:fade={{duration: 200}}>
     <div class="onboarding-popup">
         {#if step === "method"}
             <OnBoardingMethodStep on:choice={handleMethodChoice}/>
@@ -76,6 +91,9 @@
         {#if step === 'create-trucks'}
             <OnBoardingInstanceCreateTrucks on:next={handleTrucksCreated}/>
         {/if}
+        {#if step === 'bin-packing'}
+            <OnBoardingBinPacking on:next={handleBinPacking}/>
+        {/if}
         {#if step === 'create-packages'}
             <OnBoardingInstanceCreatePackages on:next={handlePackagesCreated}/>
         {/if}
@@ -83,15 +101,15 @@
             <OnBoardingCities
                     title="Starting cities"
                     cityStore={startCities}
-                    max={TruckData.instances.size}
+                    max={$binPackingResult.trucksUsed}
                     on:next={handleStartCitiesSet}/>
         {/if}
         {#if step === 'cities'}
             <OnBoardingCities
                     title="Cities to visit"
                     cityStore={citiesToTour}
-                    min={PackageData.instances.size}
-                    max={PackageData.instances.size}
+                    min={$binPackingResult.packagesPlaced}
+                    max={$binPackingResult.packagesPlaced}
                     on:next={handleCitiesSet}/>
         {/if}
         {#if step === 'history'}

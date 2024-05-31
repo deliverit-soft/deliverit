@@ -1,8 +1,10 @@
-<script>
+<script lang="ts">
     import Map from "./map/Map.svelte";
     import ResetView from "./map/ResetView.svelte";
     import Panel from "./panel/Panel.svelte";
     import OnBoarding from "./onboarding/OnBoarding.svelte";
+
+    let showOnBoarding = true;
 </script>
 
 <style>
@@ -21,7 +23,9 @@
 </style>
 
 <main>
-    <OnBoarding/>
+    {#if showOnBoarding}
+        <OnBoarding on:done={() => showOnBoarding = false}/>
+    {/if}
     <Panel/>
     <div class="map-container">
         <Map/>

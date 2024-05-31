@@ -84,3 +84,23 @@ input[type="range"]::-moz-range-thumb {
 input[type="range"]::-moz-range-thumb:hover {
     scale: 1.1;
 }
+
+progress {
+    border-radius: .25rem;
+    height: 1rem;
+}
+
+progress::-webkit-progress-bar {
+    background-color: var(--light-gray);
+    border-radius: .25rem;
+}
+
+progress::-webkit-progress-value {
+    background-color: var(--primary-theme);
+    border-radius: .25rem;
+}
+
+progress::-moz-progress-bar {
+    background-color: var(--primary-theme);
+    border-radius: .25rem;
+}
