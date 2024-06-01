@@ -2,7 +2,7 @@ import json
 import tantivy
 import time
 from .utils import to_ascii
-from .types import GeoJson
+from .types import GeoJson, Feature
 from typing import Optional
 
 _cities: Optional[GeoJson] = None
@@ -62,3 +62,10 @@ def get_index() -> tantivy.Index:
     if _index is None:
         _build_index()
     return _index
+
+
+def get_city_by_insee(insee_code: str) -> tuple[Feature, int]:
+    cities = get_cities()
+    for index, city in enumerate(cities['features']):
+        if city['properties']['INSEE_COMM'] == insee_code:
+            return city, index
