@@ -7,6 +7,7 @@
     import OnBoardingBinPacking from '$components/onboarding/OnBoardingBinPacking.svelte';
     import { createEventDispatcher } from 'svelte';
     import { fade } from 'svelte/transition';
+    import { saveCurrentInstance } from '$helpers/history.ts';
 
     const dispatch = createEventDispatcher();
 
@@ -54,6 +55,7 @@
     }
 
     function handleCitiesSet() {
+        saveCurrentInstance();
         dispatch('done');
     }
 </script>
