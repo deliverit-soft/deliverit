@@ -19,6 +19,10 @@ export const directionsClient = readable<DirectionsService>(Directions({
 export const getDirectionsClient = () => storeToValue(directionsClient);
 
 export const startCities = writable<City[]>([]);
+export const getStartCities = () => storeToValue(startCities);
+
 export const citiesToTour = writable<City[]>([]);
+export const getCitiesToTour = () => storeToValue(citiesToTour);
 
 export const binPackingResult = writable<BinPackingResult>();
+export const getBinPackingResult = () => storeToValue(binPackingResult);
