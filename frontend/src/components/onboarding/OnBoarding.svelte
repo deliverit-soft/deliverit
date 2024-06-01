@@ -8,6 +8,7 @@
     import { createEventDispatcher } from 'svelte';
     import { fade } from 'svelte/transition';
     import { saveCurrentInstance } from '$helpers/history.ts';
+    import OnBoardingHistory from '$components/onboarding/OnBoardingHistory.svelte';
 
     const dispatch = createEventDispatcher();
 
@@ -56,6 +57,10 @@
 
     function handleCitiesSet() {
         saveCurrentInstance();
+        dispatch('done');
+    }
+
+    function handleDone() {
         dispatch('done');
     }
 </script>
@@ -115,7 +120,7 @@
                     on:next={handleCitiesSet}/>
         {/if}
         {#if step === 'history'}
-            <p>History</p>
+            <OnBoardingHistory on:next={handleDone}/>
         {/if}
     </div>
 </div>

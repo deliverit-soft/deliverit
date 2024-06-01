@@ -2,6 +2,7 @@
     import { createEventDispatcher } from 'svelte';
 
     export let nextDisabled: boolean = false;
+    export let nextHidden: boolean = false;
     export let title: string = 'Onboarding step';
 
     const dispatch = createEventDispatcher();
@@ -68,7 +69,9 @@
         <slot/>
     </div>
 
-    <div class="create-next">
-        <button disabled={nextDisabled} on:click={handleNext}>Next</button>
-    </div>
+    {#if !nextHidden}
+        <div class="create-next">
+            <button disabled={nextDisabled} on:click={handleNext}>Next</button>
+        </div>
+    {/if}
 </div>
