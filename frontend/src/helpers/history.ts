@@ -55,11 +55,10 @@ export function saveCurrentInstance() {
 
 export function getHistory(): HistoryElement[] {
     let result = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '[]') as HistoryElement[];
-    result.map((element: HistoryElement) => ({
+    return result.map((element: HistoryElement) => ({
         ...element,
         date: new Date(element.date),
     }));
-    return result;
 }
 
 export function loadInstance(instance: HistoryElement) {
