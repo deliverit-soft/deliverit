@@ -1,12 +1,18 @@
 ARG PYTHON_VERSION=3.12
 ARG NODE_VERSION=20
 
+ARG MAPBOX_TOKEN
+ARG MAPBOX_STYLES
+
 FROM node:${NODE_VERSION}-alpine AS web-builder
 
 WORKDIR /frontend
 
 COPY ./frontend/package.json ./
 RUN npm install --no-audit --no-fund --no-package-lock
+
+ENV PUBLIC_MAPBOX_TOKEN=${MAPBOX_TOKEN}
+ENV PUBLIC_MAPBOX_STYLES=${MAPBOX_STYLES}
 
 COPY ./frontend ./
 RUN npm run build
