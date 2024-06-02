@@ -5,8 +5,8 @@
     import OnBoarding from './onboarding/OnBoarding.svelte';
     import { tabuVrp } from '$helpers/api.ts';
     import { binPackingResult, citiesToTour, startCities } from '$resources/stores.ts';
-    import { drawLine, colorGenerator } from '$helpers/draw.ts';
-    import type { Position } from 'geojson';
+    import { drawVrpSolution } from '$helpers/draw.ts';
+    import { ArchiveBox, Icon, Truck } from 'svelte-hero-icons';
 
     let showOnBoarding = true;
 
@@ -17,17 +17,7 @@
             $startCities,
             $citiesToTour
         );
-        const color = colorGenerator(result.bestSolution.length);
-        console.log(result);
-        for (const trajectory of result.bestSolution) {
-            drawLine(
-                trajectory.map(value => ([ value.lon, value.lat ]) as Position),
-                {
-                    "line-color": color.next().value!,
-                    "line-width": 3
-                }
-            )
-        }
+        drawVrpSolution(result.bestSolution);
     }
 </script>
 
@@ -44,6 +34,18 @@
         position: relative;
         flex: 1;
     }
+
+    .icons {
+        display: none;
+    }
+
+    :global(.archive-icon), :global(.truck-icon) {
+        padding: .25rem;
+        background: var(--primary-white);
+        border: 3px solid transparent;
+        border-radius: 50%;
+        opacity: .75 !important;
+    }
 </style>
 
 <main>
@@ -56,3 +58,8 @@
         <ResetView/>
     </div>
 </main>
+
+<div class="icons">
+    <Icon src={ArchiveBox} class="archive-icon" size="1rem"/>
+    <Icon src={Truck} class="truck-icon" size="1.5rem"/>
+</div>
