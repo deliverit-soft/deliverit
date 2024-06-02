@@ -8,9 +8,10 @@
     import { tweened } from 'svelte/motion';
     import { cubicInOut } from 'svelte/easing';
     import { TruckModel } from '$models/truck-model.ts';
-    import type { Feature } from 'geojson';
+    import type { Feature, Position } from 'geojson';
     // @ts-ignore
     import type { GeoJSONObject, LineString } from '@turf/turf';
+    import PanelTruck from '$components/panel/PanelTruck.svelte';
 
 
     let calculateRoadsProgress = tweened(0, {
@@ -19,6 +20,11 @@
     });
 
     let trucks: TruckModel[] = [];
+    let trucksPaths: Position[][] = [];
+
+
+    const getTruckPath = (index: number) => trucksPaths[index]!;
+    const getTruckColor = (index: number) => $mapFeatures.colors[index]!;
 
 
     async function handleRoadsCalculation() {
@@ -28,17 +34,19 @@
         for (let i = 0; i < $mapFeatures.straightLines.length; i++) {
             const truckLines = $mapFeatures.straightLines[i]!;
             const color = $mapFeatures.colors[i]!;
+            trucksPaths.push([]);
 
             const realPath: Feature<LineString, GeoJSONObject>[] = [];
             for (const segment of truckLines) {
+                $calculateRoadsProgress = ($mapFeatures.realPaths.flat(1).length / pathsCount) * 100;
                 try {
                     const route = await getRoute(segment.geometry.coordinates);
                     removeLine(segment);
                     realPath.push(drawLine(route, segment.properties.paint));
+                    trucksPaths[i]!.push(...route);
                 } catch (error) {
                     console.error('Route plotting error', error, segment);
                 }
-                $calculateRoadsProgress = ($mapFeatures.realPaths.flat(1).length / pathsCount) * 100;
             }
             $mapFeatures.realPaths.push(realPath);
 
@@ -109,7 +117,7 @@
     </button>
 {:else}
     <progress value={$calculateRoadsProgress} max="100"/>
-    {#each trucks as truck (truck.id)}
-        <p>{truck.id}</p>
+    {#each trucks as truck, index (truck.id)}
+        <PanelTruck {truck} path={getTruckPath(index)} {index} truckColor={getTruckColor(index)}/>
     {/each}
 {/if}
