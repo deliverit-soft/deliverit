@@ -18,6 +18,7 @@
             $citiesToTour
         );
         const color = colorGenerator(result.bestSolution.length);
+        console.log(result);
         for (const trajectory of result.bestSolution) {
             drawLine(
                 trajectory.map(value => ([ value.lon, value.lat ]) as Position),

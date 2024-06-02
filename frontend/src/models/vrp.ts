@@ -7,11 +7,13 @@ export interface VrpRequest {
 export interface VrpResponse {
     best_cost: number;
     best_solution: VrpTravelCity[][];
+    execution_times: VrpTimings;
 }
 
 export interface VrpResult {
     bestCost: number;
     bestSolution: VrpTravelCity[][];
+    executionTimes: VrpTimings;
 }
 
 export interface VrpTravelCity {
@@ -19,4 +21,12 @@ export interface VrpTravelCity {
     name: string;
     lat: number;
     lon: number;
+}
+
+export interface VrpTimings {
+    preparation: number;
+    matrix: number;
+    vrp: number;
+    response: number;
+    total: number;
 }

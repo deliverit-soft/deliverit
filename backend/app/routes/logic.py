@@ -1,4 +1,5 @@
 import random
+import time
 from flask import Blueprint, jsonify, request
 from app.logic.bin_packing import Dimension, generate_elements, place_packages_in_truck
 from app.logic.vrp_tabu import VehicleRoutingProblem, tabu_search
@@ -39,6 +40,8 @@ def bin_packing():
 
 @logic_bp.route("/api/logic/vrp_tabu", methods=["POST"])
 def vrp_tabu():
+    start_preparation = time.perf_counter_ns()
+
     trucks_packages = request.json["trucks_packages"]
     start_cities_insee = request.json["start_cities"]
     deliver_cities_insee = request.json["deliver_cities"]
@@ -51,6 +54,7 @@ def vrp_tabu():
         for _ in range(len(trucks_packages) - len(start_cities)):
             start_cities.append(start_cities[random.randint(0, len(start_cities) - 1)])
 
+    start_matrix = time.perf_counter_ns()
     matrix = get_distance_matrix_by_insee(cities_insee)
 
     vrp = VehicleRoutingProblem(
@@ -60,7 +64,10 @@ def vrp_tabu():
         start_cities,
         deliver_cities)
 
-    best_solution, best_cost = tabu_search(vrp, max_iterations=1000, tabu_tenure=100)
+    start_vrp = time.perf_counter_ns()
+    best_solution, best_cost = tabu_search(vrp, max_iterations=100, tabu_tenure=5)
+
+    start_response = time.perf_counter_ns()
 
     best_solution_response = []
 
@@ -79,4 +86,11 @@ def vrp_tabu():
     return jsonify({
         "best_solution": best_solution_response,
         "best_cost": best_cost,
+        "execution_times": {
+            "preparation": (start_matrix - start_preparation) / 1e9,
+            "matrix": (start_vrp - start_matrix) / 1e9,
+            "vrp": (start_response - start_vrp) / 1e9,
+            "response": (time.perf_counter_ns() - start_response) / 1e9,
+            "total": (time.perf_counter_ns() - start_preparation) / 1e9,
+        },
     })

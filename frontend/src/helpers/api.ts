@@ -66,5 +66,6 @@ export async function tabuVrp(packageByTruck: number[], startCities: City[], del
     return {
         bestCost: data.best_cost,
         bestSolution: data.best_solution,
+        executionTimes: data.execution_times,
     };
 }
