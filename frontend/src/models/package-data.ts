@@ -20,7 +20,7 @@ export class PackageData {
     // Instance methods
 
     private static getRandomSize() {
-        const width = randint(1, 4);
+        const width = randint(1, 3);
         const length = randint(1, 8);
         const height = randint(1, 3);
 

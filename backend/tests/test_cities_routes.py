@@ -5,9 +5,9 @@ def test_get_random_cities(client):
     for city in response.json:
         assert "insee_code" in city
         assert "name" in city
-        assert isinstance(city["insee_code"], int)
+        assert isinstance(city["insee_code"], str)
         assert isinstance(city["name"], str)
-        assert city["insee_code"] > 0
+        assert len(city["insee_code"]) == 5
         assert city["name"]
 
 
@@ -19,9 +19,9 @@ def test_get_cities_search(client):
     assert "insee_code" in paris
     assert "name" in paris
     assert "score" in paris
-    assert isinstance(paris["insee_code"], int)
+    assert isinstance(paris["insee_code"], str)
     assert isinstance(paris["name"], str)
     assert isinstance(paris["score"], float)
-    assert paris["insee_code"] == 75056
+    assert paris["insee_code"] == '75056'
     assert paris["name"] == 'Paris'
     assert paris["score"] > 0

@@ -20,7 +20,7 @@ def cities_search():
     for hit in results:
         doc = searcher.doc(hit[1])
         hits.append({
-            "insee_code": int(doc.get_first("insee_code")),
+            "insee_code": doc.get_first("insee_code"),
             "name": doc.get_first("name"),
             "score": hit[0]
         })
@@ -29,8 +29,8 @@ def cities_search():
 
 @cities_bp.route("/api/cities/random")
 def random_cities():
-    limit = clamp(int(request.args.get("limit", 1)), 1, 100)
-    cities_count = clamp(len(get_cities()['features']), 1, 100)
+    limit = clamp(int(request.args.get("limit", 1)), 1, len(get_cities()['features']))
+    cities_count = clamp(len(get_cities()['features']), 1, limit) * 2
 
     selected_cities = list()
     tries = 0
@@ -41,6 +41,6 @@ def random_cities():
         tries += 1
 
     return jsonify(list({
-        "insee_code": int(city['properties']['INSEE_COMM']),
+        "insee_code": city['properties']['INSEE_COMM'],
         "name": city['properties']['NOM_COMM'],
     } for city in selected_cities))

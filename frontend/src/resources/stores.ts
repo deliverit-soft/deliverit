@@ -4,6 +4,7 @@ import Directions, { type DirectionsService } from '@mapbox/mapbox-sdk/services/
 import type { Threebox } from 'threebox-plugin';
 import type { City } from '$models/city.ts';
 import type { BinPackingResult } from '$models/bin-packing.ts';
+import type { VrpResult } from '$models/vrp.ts';
 
 const storeToValue = <T>(store: Writable<T> | Readable<T>): T => get(store);
 
@@ -26,3 +27,6 @@ export const getCitiesToTour = () => storeToValue(citiesToTour);
 
 export const binPackingResult = writable<BinPackingResult>();
 export const getBinPackingResult = () => storeToValue(binPackingResult);
+
+export const vrpResults = writable<VrpResult>();
+export const getVrpResults = () => storeToValue(vrpResults);

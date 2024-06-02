@@ -1,9 +1,12 @@
 import json
+import numpy as np
 import tantivy
 import time
 from .utils import to_ascii
-from .types import GeoJson
+from .types import GeoJson, Feature, List
 from typing import Optional
+from numba import njit, prange
+from functools import lru_cache
 
 _cities: Optional[GeoJson] = None
 _index: Optional[tantivy.Index] = None
@@ -62,3 +65,42 @@ def get_index() -> tantivy.Index:
     if _index is None:
         _build_index()
     return _index
+
+
+@lru_cache(maxsize=512)
+def get_city_by_insee(insee_code: str) -> tuple[Feature, int]:
+    cities = get_cities()
+    for index, city in enumerate(cities['features']):
+        if city['properties']['INSEE_COMM'] == insee_code:
+            return city, index
+
+
+@njit
+def _haversine(lat1, lon1, lat2, lon2):
+    R = 6371.0  # Earth radius in kilometers
+    dlat = np.radians(lat2 - lat1)
+    dlon = np.radians(lon2 - lon1)
+    a = np.sin(dlat / 2) ** 2 + np.cos(np.radians(lat1)) * np.cos(np.radians(lat2)) * np.sin(dlon / 2) ** 2
+    c = 2 * np.arctan2(np.sqrt(a), np.sqrt(1 - a))
+    distance = R * c
+    return distance
+
+
+@njit(parallel=True)
+def _calculate_distance_matrix(coords: np.ndarray) -> np.ndarray:
+    num_cities = coords.shape[0]
+    distance_matrix = np.zeros((num_cities, num_cities))
+
+    for i in prange(num_cities):
+        for j in range(i, num_cities):
+            distance = _haversine(coords[i, 1], coords[i, 0], coords[j, 1], coords[j, 0])
+            distance_matrix[i, j] = distance
+            distance_matrix[j, i] = distance
+
+    return distance_matrix
+
+
+def get_distance_matrix_by_insee(insee_codes: List[str] | set[str]) -> np.ndarray:
+    cities = [get_city_by_insee(insee_code)[0] for insee_code in insee_codes]
+    coords = np.array([(city['geometry']['coordinates'][0], city['geometry']['coordinates'][1]) for city in cities])
+    return _calculate_distance_matrix(coords)
