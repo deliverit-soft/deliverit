@@ -18,8 +18,8 @@
             $citiesToTour
         );
         $vrpResults = result;
-        drawVrpSolution(result.bestSolution);
         vrpStep = 'done';
+        await drawVrpSolution(result.bestSolution);
     }
 </script>
 

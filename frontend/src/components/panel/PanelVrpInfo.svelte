@@ -1,8 +1,32 @@
 <script lang="ts">
-    import { vrpResults } from '$resources/stores.ts';
+    import { mapFeatures, vrpResults } from '$resources/stores.ts';
     import { durationFormat } from '$helpers/utils.ts';
     import { ArrowPathRoundedSquare, ArrowTrendingUp, Clock, Icon, Squares2x2 } from 'svelte-hero-icons';
     import { fade } from 'svelte/transition';
+    import { getRoute } from '$helpers/geo.ts';
+    import { drawLine, removeLine } from '$helpers/draw.ts';
+
+
+    let calculateRoadsProgress = 0;
+
+
+    async function handleRoadsCalculation() {
+        for (const truckLines of $mapFeatures.straightLines) {
+            const realPath = [];
+            for (const segment of truckLines) {
+                try {
+                    const route = await getRoute(segment.geometry.coordinates)
+                    removeLine(segment);
+                    realPath.push(drawLine(route, segment.properties.paint));
+                } catch (error) {
+                    console.error('Route plotting error', error);
+                }
+            }
+            $mapFeatures.straightLines = [];
+            $mapFeatures.realPaths.push(realPath);
+        }
+        console.log($mapFeatures);
+    }
 </script>
 
 
@@ -17,6 +41,19 @@
         color: var(--primary-white);
         border-radius: 1rem;
     }
+
+    button {
+        display: block;
+        width: 100%;
+        padding: 0.75rem;
+        margin-top: 1rem;
+        background-color: var(--primary-theme);
+        color: var(--primary-white);
+        border: none;
+        border-radius: 1rem;
+        cursor: pointer;
+        font-size: inherit;
+    }
 </style>
 
 
@@ -30,3 +67,9 @@
     <Icon src={ArrowTrendingUp} size="1.5rem"/>
     Total distance: {$vrpResults.bestCost.toFixed(0)} km
 </div>
+
+{#if calculateRoadsProgress === 0}
+    <button on:click={handleRoadsCalculation}>
+        Click to calculate real roads
+    </button>
+{/if}

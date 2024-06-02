@@ -5,6 +5,7 @@ import type { Threebox } from 'threebox-plugin';
 import type { City } from '$models/city.ts';
 import type { BinPackingResult } from '$models/bin-packing.ts';
 import type { VrpResult } from '$models/vrp.ts';
+import { DEFAULT_MAP_FEATURES, type MapFeatures } from '$models/map-features.ts';
 
 const storeToValue = <T>(store: Writable<T> | Readable<T>): T => get(store);
 
@@ -30,3 +31,6 @@ export const getBinPackingResult = () => storeToValue(binPackingResult);
 
 export const vrpResults = writable<VrpResult>();
 export const getVrpResults = () => storeToValue(vrpResults);
+
+export const mapFeatures = writable<MapFeatures>(DEFAULT_MAP_FEATURES);
+export const getMapFeatures = () => storeToValue(mapFeatures);

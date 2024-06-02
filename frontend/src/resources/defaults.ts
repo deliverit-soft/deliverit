@@ -11,3 +11,5 @@ export const DEFAULT_POSITION = {
     bearing: DEFAULT_BEARING,
     pitch: DEFAULT_PITCH,
 };
+
+export const PATHS_PACKAGES_COUNT = 5;
