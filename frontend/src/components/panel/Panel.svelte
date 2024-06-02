@@ -43,6 +43,7 @@
         z-index: 1;
         position: relative;
         padding: 1rem;
+        overflow: hidden auto;
     }
 
     .resizer {
