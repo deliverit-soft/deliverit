@@ -2,14 +2,14 @@ import { getMap } from '../resources/stores.ts';
 import type { Feature, Position } from 'geojson';
 import mapboxgl from 'mapbox-gl';
 
-export async function drawLine(
+export function drawLine(
     coordinates: Position[],
     paint: mapboxgl.LinePaint = {
         'line-color': '#000',
         'line-width': 2,
     },
-): Promise<Feature> {
-    const map = await getMap();
+): Feature {
+    const map = getMap();
     const id = `line-${Math.random()}`;
 
     const line: Feature = {
@@ -43,4 +43,11 @@ export async function drawLine(
     }, 'building-extrusion');
 
     return line;
+}
+
+
+export function *colorGenerator(nuances: number) {
+    for (let i = 0; i < nuances; i++) {
+        yield `hsl(${Math.floor(i * 360 / nuances)}, 100%, 50%)`;
+    }
 }
