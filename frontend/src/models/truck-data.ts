@@ -1,4 +1,3 @@
-import { Truck } from './truck.ts';
 import { randint, range } from '../helpers/utils.ts';
 import { writable } from 'svelte/store';
 
@@ -11,9 +10,6 @@ export class TruckData {
     #length: number;
     #height: number;
     readonly packages = new Set();
-    readonly model = new Truck({
-        id: String(Math.random()),
-    });
 
     constructor(width: number, length: number, height: number) {
         this.#width = width;
@@ -102,7 +98,6 @@ export class TruckData {
     // Lifecycle methods
 
     destroy(): void {
-        this.model.destroy();
         TruckData.instances.delete(this);
         TruckData.instancesStore.set([ ...TruckData.instances ]);
         TruckData.groupedInstancesStore.set(TruckData.groupedInstances);

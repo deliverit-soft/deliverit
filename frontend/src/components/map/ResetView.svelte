@@ -1,7 +1,7 @@
 <script lang="ts">
     import { mapStore } from '$resources/stores.ts';
     import { DEFAULT_POSITION, DEFAULT_ZOOM } from '$resources/defaults.ts';
-    import { Truck } from '$models/truck.ts';
+    import { TruckModel } from '$models/truck-model.ts';
     import { fade } from 'svelte/transition';
 
     let isDefaultPosition = true;
@@ -21,7 +21,7 @@
         // Set variables and unfollow all trucks
         cameraMoving = true;
         isDefaultPosition = true;
-        Truck.unfollowAll();
+        TruckModel.unfollowAll();
 
         // Reset view
         $mapStore.setMinZoom(1);
