@@ -4,7 +4,7 @@
     import Panel from './panel/Panel.svelte';
     import OnBoarding from './onboarding/OnBoarding.svelte';
     import { tabuVrp } from '$helpers/api.ts';
-    import { binPackingResult, citiesToTour, startCities } from '$resources/stores.ts';
+    import { binPackingResult, citiesToTour, startCities, vrpResults } from '$resources/stores.ts';
     import { drawVrpSolution } from '$helpers/draw.ts';
     import { ArchiveBox, Icon, Truck } from 'svelte-hero-icons';
 
@@ -17,6 +17,7 @@
             $startCities,
             $citiesToTour
         );
+        $vrpResults = result;
         drawVrpSolution(result.bestSolution);
         vrpStep = 'done';
     }
