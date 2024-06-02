@@ -2,6 +2,7 @@
     import { Icon, MagnifyingGlass } from 'svelte-hero-icons';
     import { onDestroy, onMount } from 'svelte';
     import { fade } from 'svelte/transition';
+    import { durationFormat } from '$helpers/utils.ts';
 
     let duration: string = '';
     let start: number = Date.now();
@@ -9,13 +10,7 @@
 
     function updateDurationText() {
         const elapsed = Date.now() - start;
-        const minutes = Math.floor(elapsed / 60000);
-        const seconds = Math.floor((elapsed % 60000) / 1000);
-        const milliseconds = Math.floor((elapsed % 1000));
-        if (elapsed < 10000)
-            duration = `${seconds}s ${milliseconds}ms`;
-        else
-            duration = `${minutes}m ${seconds}s`;
+        duration = durationFormat(elapsed);
     }
 
     onMount(() => {
