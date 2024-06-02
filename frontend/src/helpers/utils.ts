@@ -8,7 +8,7 @@ export const range = (min: number, max: number) => Array.from({ length: randint(
 export function durationFormat(duration: number) {
     const minutes = Math.floor(duration / 60000);
     const seconds = ((duration % 60000) / 1000).toFixed(0);
-    const milliseconds = duration % 1000;
+    const milliseconds = Math.round(duration % 1000);
 
     if (minutes === 0)
         return `${seconds}s ${String(milliseconds).padStart(3, '0')}ms`;
