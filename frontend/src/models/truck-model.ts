@@ -11,7 +11,7 @@ import { getMap, getThreebox } from '../resources/stores.ts';
 import { alongPath, chunkPath, pathBearing, pathLength, sliceAlongPath } from '../helpers/geo.ts';
 import mapboxgl, { type LngLatLike } from 'mapbox-gl';
 
-export class Truck extends EventTarget {
+export class TruckModel extends EventTarget {
     // Config
     readonly #id: string;
     readonly #zoomMarkerThreshold: number = 15.5;
@@ -40,7 +40,7 @@ export class Truck extends EventTarget {
     // Instances
     #truck: ThreeboxObject | null = null;
     readonly #marker: mapboxgl.Marker | null = null;
-    static readonly #trucks: Map<string, Truck> = new Map();
+    static readonly #trucks: Map<string, TruckModel> = new Map();
 
     constructor(config: TruckConfig) {
         super();
@@ -49,7 +49,7 @@ export class Truck extends EventTarget {
         this.markerColor = config.markerColor ?? this.markerColor;
         this.#zoomMarkerThreshold = config.zoomMarkerThreshold ?? this.#zoomMarkerThreshold;
         this.#autoCameraFollow = config.autoCameraFollow ?? this.#autoCameraFollow;
-        Truck.#trucks.set(this.#id, this);
+        TruckModel.#trucks.set(this.#id, this);
 
         if (this.enableMarker) {
             this.#marker = new mapboxgl.Marker({
@@ -102,7 +102,7 @@ export class Truck extends EventTarget {
     }
 
     public static get instances() {
-        return Truck.#trucks;
+        return TruckModel.#trucks;
     }
 
     /** Set truck speed (m/s) */
@@ -181,7 +181,7 @@ export class Truck extends EventTarget {
         getThreebox().remove(this.object);
         this.#spawned = false;
         this.dispatchEvent(new Event('destroy'));
-        Truck.#trucks.delete(this.#id);
+        TruckModel.#trucks.delete(this.#id);
     }
 
     // Methods
@@ -246,7 +246,7 @@ export class Truck extends EventTarget {
     }
 
     public static unfollowAll() {
-        for (const truck of Truck.#trucks.values())
+        for (const truck of TruckModel.#trucks.values())
             truck.unfollow();
     }
 
