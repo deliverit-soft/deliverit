@@ -39,7 +39,10 @@ export function chunkify<T>(elements: T[], size: number): T[][] {
  */
 export function chunkifyPath<T>(elements: T[], size: number): T[][] {
     const chunks: T[][] = [];
-    for (let i = 0; i < elements.length; i += size - 1)
-        chunks.push(elements.slice(i, i + size));
+    for (let i = 0; i < elements.length; i += size - 1) {
+        const slice = elements.slice(i, i + size);
+        if (slice.length > 1)
+            chunks.push(slice);
+    }
     return chunks;
 }
