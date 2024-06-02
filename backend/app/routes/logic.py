@@ -65,7 +65,7 @@ def vrp_tabu():
         deliver_cities)
 
     start_vrp = time.perf_counter_ns()
-    best_solution, best_cost = tabu_search(vrp, max_iterations=100, tabu_tenure=5)
+    best_solution, best_cost = tabu_search(vrp, max_iterations=100, tabu_tenure=1000)
 
     start_response = time.perf_counter_ns()
 
