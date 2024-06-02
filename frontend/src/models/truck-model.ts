@@ -8,8 +8,9 @@ import type {
 } from 'threebox-plugin';
 import type { Position } from 'geojson';
 import { getMap, getThreebox } from '../resources/stores.ts';
-import { alongPath, chunkPath, pathBearing, pathLength, sliceAlongPath } from '../helpers/geo.ts';
+import { alongPath, pathBearing, pathLength, sliceAlongPath } from '../helpers/geo.ts';
 import mapboxgl, { type LngLatLike } from 'mapbox-gl';
+import { placeMarker } from '$helpers/draw.ts';
 
 export class TruckModel extends EventTarget {
     // Config
@@ -52,11 +53,7 @@ export class TruckModel extends EventTarget {
         TruckModel.#trucks.set(this.#id, this);
 
         if (this.enableMarker) {
-            this.#marker = new mapboxgl.Marker({
-                color: this.markerColor,
-            });
-            this.#marker.setLngLat([ 0, 0 ]);
-            this.#marker.addTo(getMap());
+            this.#marker = placeMarker([ 0, 0 ], 'truck', this.markerColor);
         }
     }
 
@@ -257,7 +254,8 @@ export class TruckModel extends EventTarget {
         this.#path = path;
         this.#pathLength = pathLength(path);
         this.#pathProgress = 0;
-        this.#chunkedPath = chunkPath(path, 5);
+        // this.#chunkedPath = chunkPath(path, 5); TODO: performance update to put back chunking
+        this.#chunkedPath = path;
         this.#previousPosition = this.#chunkedPath[0]!;
         this.#lastMoveRegistered = Date.now();
 
