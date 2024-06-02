@@ -97,6 +97,10 @@
         width: 100%;
         margin-top: 1rem;
     }
+
+    .trucks-list {
+        padding: .5rem;
+    }
 </style>
 
 
@@ -117,7 +121,9 @@
     </button>
 {:else}
     <progress value={$calculateRoadsProgress} max="100"/>
-    {#each trucks as truck, index (truck.id)}
-        <PanelTruck {truck} path={getTruckPath(index)} {index} truckColor={getTruckColor(index)}/>
-    {/each}
+    <div class="trucks-list">
+        {#each trucks as truck, index (truck.id)}
+            <PanelTruck {truck} path={getTruckPath(index)} {index} truckColor={getTruckColor(index)}/>
+        {/each}
+    </div>
 {/if}
