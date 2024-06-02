@@ -5,27 +5,57 @@
     import { fade } from 'svelte/transition';
     import { getRoute } from '$helpers/geo.ts';
     import { drawLine, removeLine } from '$helpers/draw.ts';
+    import { tweened } from 'svelte/motion';
+    import { cubicInOut } from 'svelte/easing';
+    import { TruckModel } from '$models/truck-model.ts';
+    import type { Feature } from 'geojson';
+    // @ts-ignore
+    import type { GeoJSONObject, LineString } from '@turf/turf';
 
 
-    let calculateRoadsProgress = 0;
+    let calculateRoadsProgress = tweened(0, {
+        duration: 1000,
+        easing: cubicInOut,
+    });
+
+    let trucks: TruckModel[] = [];
 
 
     async function handleRoadsCalculation() {
-        for (const truckLines of $mapFeatures.straightLines) {
-            const realPath = [];
+        $calculateRoadsProgress += 0.001;
+        const pathsCount = $mapFeatures.straightLines.flat(1).length;
+
+        for (let i = 0; i < $mapFeatures.straightLines.length; i++) {
+            const truckLines = $mapFeatures.straightLines[i]!;
+            const color = $mapFeatures.colors[i]!;
+
+            const realPath: Feature<LineString, GeoJSONObject>[] = [];
             for (const segment of truckLines) {
                 try {
-                    const route = await getRoute(segment.geometry.coordinates)
+                    const route = await getRoute(segment.geometry.coordinates);
                     removeLine(segment);
                     realPath.push(drawLine(route, segment.properties.paint));
                 } catch (error) {
-                    console.error('Route plotting error', error);
+                    console.error('Route plotting error', error, segment);
                 }
+                $calculateRoadsProgress = ($mapFeatures.realPaths.flat(1).length / pathsCount) * 100;
             }
-            $mapFeatures.straightLines = [];
             $mapFeatures.realPaths.push(realPath);
+
+            const truck = new TruckModel({
+                id: String(Math.random()).slice(2),
+                enableMarker: true,
+                markerColor: color,
+            });
+            await truck.load();
+            truck.object.setCoords(realPath[0]!.geometry.coordinates[0]);
+            truck.spawn();
+            trucks = [...trucks, truck];
         }
-        console.log($mapFeatures);
+
+        $mapFeatures.straightLines = [];
+
+        $calculateRoadsProgress = 100;
     }
 </script>
 
@@ -54,6 +84,11 @@
         cursor: pointer;
         font-size: inherit;
     }
+
+    progress {
+        width: 100%;
+        margin-top: 1rem;
+    }
 </style>
 
 
@@ -68,8 +103,13 @@
     Total distance: {$vrpResults.bestCost.toFixed(0)} km
 </div>
 
-{#if calculateRoadsProgress === 0}
+{#if $calculateRoadsProgress === 0}
     <button on:click={handleRoadsCalculation}>
         Click to calculate real roads
     </button>
+{:else}
+    <progress value={$calculateRoadsProgress} max="100"/>
+    {#each trucks as truck (truck.id)}
+        <p>{truck.id}</p>
+    {/each}
 {/if}
