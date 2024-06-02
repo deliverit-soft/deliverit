@@ -3,7 +3,7 @@ from flask import Blueprint, jsonify, request
 from app.logic.bin_packing import Dimension, generate_elements, place_packages_in_truck
 from app.logic.vrp_tabu import VehicleRoutingProblem, tabu_search
 from app.utils.utils import numpy_to_object
-from app.utils.cities import get_distance_matrix_by_insee
+from app.utils.cities import get_distance_matrix_by_insee, get_city_by_insee
 
 logic_bp = Blueprint("logic", __name__)
 
@@ -62,7 +62,21 @@ def vrp_tabu():
 
     best_solution, best_cost = tabu_search(vrp, max_iterations=1000, tabu_tenure=100)
 
+    best_solution_response = []
+
+    for truck in best_solution:
+        truck_response = []
+        for city in truck:
+            city, _ = get_city_by_insee(cities_insee[city])
+            truck_response.append({
+                "name": city['properties']["NOM_COMM"],
+                "insee": city['properties']["INSEE_COMM"],
+                "lat": city['geometry']['coordinates'][1],
+                "lon": city['geometry']['coordinates'][0],
+            })
+        best_solution_response.append(truck_response)
+
     return jsonify({
-        "best_solution": best_solution,
+        "best_solution": best_solution_response,
         "best_cost": best_cost,
     })
