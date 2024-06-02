@@ -322,7 +322,7 @@ export class TruckModel extends EventTarget {
             requestAnimationFrame(this.onAnimationFrame.bind(this));
 
         // Handle end of path, when the truck hasn't moved for 100ms
-        if (this.#followPath && Date.now() - this.#lastMoveRegistered > 100) {
+        if (this.#followPath && Date.now() - this.#lastMoveRegistered > 2000) {
             this.#followPath = false;
             this.#pathProgress = 1;
             this.#cameraFollow = false;
