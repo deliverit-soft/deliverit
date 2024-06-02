@@ -123,7 +123,6 @@ export async function drawVrpSolution(solution: VrpTravelCity[][]) {
     }
 
     mapFeaturesStore.set(mapFeatures);
-    console.log(mapFeatures);
 
     // Draw start points
     solution
