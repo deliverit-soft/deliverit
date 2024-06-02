@@ -59,9 +59,9 @@ export class TruckData {
     // Instance methods
 
     private static getRandomSize() {
-        const width = randint(2, 4);
-        const length = randint(3, 20);
-        const height = randint(2, 4);
+        const width = randint(3, 5);
+        const length = randint(3, 25);
+        const height = randint(3, 5);
 
         return { width, length, height };
     }
