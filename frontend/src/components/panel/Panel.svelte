@@ -3,6 +3,7 @@
     import PanelBrand from './PanelBrand.svelte';
     import PanelInstanceInfo from '$components/panel/PanelInstanceInfo.svelte';
     import PanelVrpLoading from '$components/panel/PanelVrpLoading.svelte';
+    import PanelVrpInfo from '$components/panel/PanelVrpInfo.svelte';
 
     export let vrpStep: 'onboarding' | 'vrp' | 'done';
 
@@ -67,6 +68,7 @@
     {#if vrpStep === 'vrp'}
         <PanelVrpLoading/>
     {:else if vrpStep === 'done'}
+        <PanelVrpInfo/>
     {/if}
     <div class="resizer" on:dblclick={handleDblClick} on:mousedown={handleResizeStart} role="none"/>
 </aside>
