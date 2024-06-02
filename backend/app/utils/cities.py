@@ -6,6 +6,7 @@ from .utils import to_ascii
 from .types import GeoJson, Feature, List
 from typing import Optional
 from numba import njit, prange
+from functools import lru_cache
 
 _cities: Optional[GeoJson] = None
 _index: Optional[tantivy.Index] = None
@@ -66,6 +67,7 @@ def get_index() -> tantivy.Index:
     return _index
 
 
+@lru_cache(maxsize=512)
 def get_city_by_insee(insee_code: str) -> tuple[Feature, int]:
     cities = get_cities()
     for index, city in enumerate(cities['features']):
