@@ -8,16 +8,17 @@
     import { drawVrpSolution } from '$helpers/draw.ts';
     import { ArchiveBox, Icon, Truck } from 'svelte-hero-icons';
 
-    let showOnBoarding = true;
+    let vrpStep: 'onboarding' | 'vrp' | 'done' = 'onboarding';
 
     async function handleOnBoardingDone() {
-        showOnBoarding = false;
+        vrpStep = 'vrp';
         const result = await tabuVrp(
             $binPackingResult.packageCountPerTruck,
             $startCities,
             $citiesToTour
         );
         drawVrpSolution(result.bestSolution);
+        vrpStep = 'done';
     }
 </script>
 
@@ -49,10 +50,10 @@
 </style>
 
 <main>
-    {#if showOnBoarding}
+    {#if vrpStep === 'onboarding'}
         <OnBoarding on:done={handleOnBoardingDone}/>
     {/if}
-    <Panel/>
+    <Panel {vrpStep}/>
     <div class="map-container">
         <Map/>
         <ResetView/>
