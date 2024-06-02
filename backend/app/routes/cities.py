@@ -29,8 +29,8 @@ def cities_search():
 
 @cities_bp.route("/api/cities/random")
 def random_cities():
-    limit = clamp(int(request.args.get("limit", 1)), 1, 100)
-    cities_count = clamp(len(get_cities()['features']), 1, 100)
+    limit = clamp(int(request.args.get("limit", 1)), 1, len(get_cities()['features']))
+    cities_count = clamp(len(get_cities()['features']), 1, limit) * 2
 
     selected_cities = list()
     tries = 0
