@@ -9,7 +9,6 @@ static_bp.static_folder = str(dist_path)
 
 @static_bp.route('/')
 def index():
-    print('sending', str(dist_path / 'index.html'))
     return static_bp.send_static_file('index.html')
 
 
