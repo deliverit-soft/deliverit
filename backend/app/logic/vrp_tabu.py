@@ -184,6 +184,10 @@ def tabu_search(vrp: VehicleRoutingProblem, max_iterations: int, tabu_tenure: in
 
     # Update the number of parcels per vehicle (excluding start and end points)
     vrp.num_parcels = [len(route[route != -1]) - 2 for route in best_solution]
+
+    # Remove the padding (-1) from the solution
+    best_solution = [route[route != -1] for route in best_solution]
+
     return best_solution, best_cost
 
 
