@@ -1,7 +1,10 @@
-import { getMap } from '../resources/stores.ts';
+import { getMap, getMapFeatures, mapFeatures as mapFeaturesStore } from '../resources/stores.ts';
 import type { Feature, Position } from 'geojson';
 import mapboxgl, { type LngLatLike } from 'mapbox-gl';
 import type { VrpTravelCity } from '$models/vrp.ts';
+import { chunkifyPath, wait } from '$helpers/utils.ts';
+import { PATHS_PACKAGES_COUNT } from '$resources/defaults.ts';
+import { DEFAULT_MAP_FEATURES } from '$models/map-features.ts';
 
 export function drawLine(
     coordinates: Position[],
@@ -11,12 +14,13 @@ export function drawLine(
     },
 ): Feature {
     const map = getMap();
-    const id = `line-${Math.random()}`;
+    const id = `line-${Math.random().toString().slice(2)}`;
 
     const line: Feature = {
         type: 'Feature',
         properties: {
             id,
+            paint,
         },
         geometry: {
             type: 'LineString',
@@ -47,6 +51,13 @@ export function drawLine(
 }
 
 
+export function removeLine(line: Feature) {
+    const map = getMap();
+    map.removeLayer(line.properties!.id);
+    map.removeSource(line.properties!.id);
+}
+
+
 export function placeMarker(pos: LngLatLike, model: 'archive' | 'truck' | null = null, color?: string) {
     const map = getMap();
     let element: HTMLElement | undefined;
@@ -74,23 +85,44 @@ export function* colorGenerator(nuances: number) {
 }
 
 
-export function drawVrpSolution(solution: VrpTravelCity[][]) {
+export async function drawVrpSolution(solution: VrpTravelCity[][]) {
     // Draw paths
     const colorGen = colorGenerator(solution.length);
-    for (const path of solution) {
-        const color = colorGen.next().value!;
-        drawLine(
-            path.map(value => ([ value.lon, value.lat ]) as Position),
-            {
-                'line-color': color,
-                'line-width': 3,
-            },
-        );
+    const mapFeatures = getMapFeatures();
+    mapFeaturesStore.set(DEFAULT_MAP_FEATURES);
 
-        for (const city of path) {
-            placeMarker([ city.lon, city.lat ], 'archive', color);
+    for (const truckRoute of solution) {
+        const color = colorGen.next().value!;
+        const path = truckRoute.map(value => ([ value.lon, value.lat ]) as Position);
+        const chunkedPath = chunkifyPath(path, PATHS_PACKAGES_COUNT);
+
+        mapFeatures.colors.push(color);
+        const straightLines: Feature[] = [];
+        const packagesMarkers: mapboxgl.Marker[] = [];
+
+        for (const chunk of chunkedPath) {
+            const line = drawLine(
+                chunk,
+                {
+                    'line-color': color,
+                    'line-width': 3,
+                },
+            );
+            straightLines.push(line);
+            await wait(50);
         }
+
+        for (const city of truckRoute) {
+            const marker = placeMarker([ city.lon, city.lat ], 'archive', color);
+            packagesMarkers.push(marker);
+            await wait(20);
+        }
+
+        mapFeatures.straightLines.push(straightLines);
+        mapFeatures.packagesMarkers.push(packagesMarkers);
     }
+
+    mapFeaturesStore.set(mapFeatures);
 
     // Draw start points
     solution

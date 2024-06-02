@@ -8,10 +8,11 @@ import type {
 } from 'threebox-plugin';
 import type { Position } from 'geojson';
 import { getMap, getThreebox } from '../resources/stores.ts';
-import { alongPath, chunkPath, pathBearing, pathLength, sliceAlongPath } from '../helpers/geo.ts';
+import { alongPath, pathBearing, pathLength, sliceAlongPath } from '../helpers/geo.ts';
 import mapboxgl, { type LngLatLike } from 'mapbox-gl';
+import { placeMarker } from '$helpers/draw.ts';
 
-export class Truck extends EventTarget {
+export class TruckModel extends EventTarget {
     // Config
     readonly #id: string;
     readonly #zoomMarkerThreshold: number = 15.5;
@@ -40,7 +41,7 @@ export class Truck extends EventTarget {
     // Instances
     #truck: ThreeboxObject | null = null;
     readonly #marker: mapboxgl.Marker | null = null;
-    static readonly #trucks: Map<string, Truck> = new Map();
+    static readonly #trucks: Map<string, TruckModel> = new Map();
 
     constructor(config: TruckConfig) {
         super();
@@ -49,14 +50,10 @@ export class Truck extends EventTarget {
         this.markerColor = config.markerColor ?? this.markerColor;
         this.#zoomMarkerThreshold = config.zoomMarkerThreshold ?? this.#zoomMarkerThreshold;
         this.#autoCameraFollow = config.autoCameraFollow ?? this.#autoCameraFollow;
-        Truck.#trucks.set(this.#id, this);
+        TruckModel.#trucks.set(this.#id, this);
 
         if (this.enableMarker) {
-            this.#marker = new mapboxgl.Marker({
-                color: this.markerColor,
-            });
-            this.#marker.setLngLat([ 0, 0 ]);
-            this.#marker.addTo(getMap());
+            this.#marker = placeMarker([ 0, 0 ], 'truck', this.markerColor);
         }
     }
 
@@ -102,7 +99,7 @@ export class Truck extends EventTarget {
     }
 
     public static get instances() {
-        return Truck.#trucks;
+        return TruckModel.#trucks;
     }
 
     /** Set truck speed (m/s) */
@@ -181,7 +178,7 @@ export class Truck extends EventTarget {
         getThreebox().remove(this.object);
         this.#spawned = false;
         this.dispatchEvent(new Event('destroy'));
-        Truck.#trucks.delete(this.#id);
+        TruckModel.#trucks.delete(this.#id);
     }
 
     // Methods
@@ -246,7 +243,7 @@ export class Truck extends EventTarget {
     }
 
     public static unfollowAll() {
-        for (const truck of Truck.#trucks.values())
+        for (const truck of TruckModel.#trucks.values())
             truck.unfollow();
     }
 
@@ -257,7 +254,8 @@ export class Truck extends EventTarget {
         this.#path = path;
         this.#pathLength = pathLength(path);
         this.#pathProgress = 0;
-        this.#chunkedPath = chunkPath(path, 5);
+        // this.#chunkedPath = chunkPath(path, 5); TODO: performance update to put back chunking
+        this.#chunkedPath = path;
         this.#previousPosition = this.#chunkedPath[0]!;
         this.#lastMoveRegistered = Date.now();
 
@@ -324,7 +322,7 @@ export class Truck extends EventTarget {
             requestAnimationFrame(this.onAnimationFrame.bind(this));
 
         // Handle end of path, when the truck hasn't moved for 100ms
-        if (this.#followPath && Date.now() - this.#lastMoveRegistered > 100) {
+        if (this.#followPath && Date.now() - this.#lastMoveRegistered > 2000) {
             this.#followPath = false;
             this.#pathProgress = 1;
             this.#cameraFollow = false;
