@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import time
 from typing import Optional, List
+from numba import njit
 
 
 class VehicleRoutingProblem:
@@ -90,19 +91,8 @@ class VehicleRoutingProblem:
         Returns:
             float: The total cost of the solution.
         """
-        total_distance = 0
-
-        for route in solutions:
-            if len(route) < 2:
-                continue
-
-            route_distance = 0
-            for i in range(len(route) - 1):
-                route_distance += self.distance_matrix[route[i], route[i + 1]]
-
-            total_distance += route_distance
-
-        return total_distance
+        padded_solutions = self._pad_solutions(solutions)
+        return evaluate_numba(padded_solutions, self.distance_matrix)
 
     def get_neighbors(self, solutions: list) -> list:
         """Generates neighbors of a solution by swapping two locations in the same route.
@@ -113,17 +103,43 @@ class VehicleRoutingProblem:
         Returns:
             list: a list of neighbor solutions
         """
-        neighbors = []
+        padded_solutions = self._pad_solutions(solutions)
+        return get_neighbors_numba(padded_solutions, self.num_vehicles)
 
-        for k in range(self.num_vehicles):
-            route = solutions[k]
-            for i in range(1, len(route) - 1):  # Skip the first and last locations (start and end points)
-                for j in range(i + 1, len(route) - 1):
-                    neighbor = [route[:] for route in solutions]
-                    neighbor[k][i], neighbor[k][j] = neighbor[k][j], neighbor[k][i]
-                    neighbors.append(neighbor)
+    def _pad_solutions(self, solutions: list) -> np.ndarray:
+        max_length = max(len(route) for route in solutions)
+        padded_solutions = np.full((self.num_vehicles, max_length), -1, dtype=int)
+        for i, route in enumerate(solutions):
+            padded_solutions[i, :len(route)] = route
+        return padded_solutions
 
-        return neighbors
+
+@njit
+def evaluate_numba(solutions: np.ndarray, distance_matrix: np.ndarray) -> float:
+    total_distance = 0.0
+    for route in solutions:
+        route_distance = 0.0
+        valid_route = route[route != -1]
+        if len(valid_route) < 2:
+            continue
+        for i in range(len(valid_route) - 1):
+            route_distance += distance_matrix[valid_route[i], valid_route[i + 1]]
+        total_distance += route_distance
+    return total_distance
+
+
+@njit
+def get_neighbors_numba(solutions: np.ndarray, num_vehicles: int) -> list:
+    neighbors = []
+    for k in range(num_vehicles):
+        route = solutions[k]
+        valid_route = route[route != -1]
+        for i in range(1, len(valid_route) - 1):
+            for j in range(i + 1, len(valid_route) - 1):
+                neighbor = solutions.copy()
+                neighbor[k][i], neighbor[k][j] = neighbor[k][j], neighbor[k][i]
+                neighbors.append(neighbor)
+    return neighbors
 
 
 def tabu_search(vrp: VehicleRoutingProblem, max_iterations: int, tabu_tenure: int) -> tuple:
@@ -150,7 +166,7 @@ def tabu_search(vrp: VehicleRoutingProblem, max_iterations: int, tabu_tenure: in
         for neighbor in neighbors:
             cost = vrp.evaluate(neighbor)
 
-            if neighbor not in tabu_list and cost < best_neighbor_cost:
+            if not any(np.array_equal(neighbor, t) for t in tabu_list) and cost < best_neighbor_cost:
                 best_neighbor = neighbor
                 best_neighbor_cost = cost
 
@@ -167,8 +183,7 @@ def tabu_search(vrp: VehicleRoutingProblem, max_iterations: int, tabu_tenure: in
             tabu_list.pop(0)
 
     # Update the number of parcels per vehicle (excluding start and end points)
-    vrp.num_parcels = [len(route) - 2 for route in best_solution]
-
+    vrp.num_parcels = [len(route[route != -1]) - 2 for route in best_solution]
     return best_solution, best_cost
 
 
