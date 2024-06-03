@@ -37,7 +37,11 @@ visualize your deliveries and routes in a map.
   - API calls to the backend
 - `/notebooks`: Jupyter notebooks
   - [Deliverable 1](./notebooks/deliverable-1.ipynb): Project definition, constraints, first mathematical models
+  - [Deliverable 2](./notebooks/deliverable-2.ipynb): Constraints, VRP and bin packing algorithms, statistical analysis
   - [Cities generation](./notebooks/cities-generation.ipynb): Generation of cities GeoJson, currently stored in [/backend/resources/cities.geojson](./backend/resources/cities.geojson)
+- `/.github/workflows`: GitHub actions
+  - `back-build.yml`: Build and test the python backend
+  - `front-build.yml`: Build and test the svelte frontend
 
 ---
 
