@@ -48,3 +48,11 @@ This project is a school project from 4 [CESI](https://www.cesi.fr/) students :
 - [DENNI Raphaël](https://github.com/raphaeldenni)
 - [PINHEIRO CRUZ Matthis](https://github.com/Matth2A)
 - [WOLFF Julien](https://github.com/julien-wff)
+
+---
+
+## Screenshots
+
+![Main view](./.github/assets/main-view.webp)
+![Demo video](./.github/assets/demo-video.mp4)
+![3D Truck](./.github/assets/truck.webp)
