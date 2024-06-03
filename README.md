@@ -54,5 +54,7 @@ This project is a school project from 4 [CESI](https://www.cesi.fr/) students :
 ## Screenshots
 
 ![Main view](./.github/assets/main-view.webp)
-![Demo video](./.github/assets/demo-video.mp4)
+
+https://github.com/deliverit-soft/deliverit/assets/50249422/a6f16712-c1b7-4f3e-a889-4bb9b9622f1b
+
 ![3D Truck](./.github/assets/truck.webp)
