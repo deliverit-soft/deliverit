@@ -1,0 +1,7 @@
+frontend/.env
+frontend/.env.example
+frontend/.gitignore
+frontend/bun.lockb
+frontend/node_modules
+frontend/.astro
+backend/dist
