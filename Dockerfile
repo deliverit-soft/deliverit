@@ -37,7 +37,8 @@ RUN adduser \
 
 RUN --mount=type=cache,target=/root/.cache/pip \
     --mount=type=bind,source=backend/requirements.txt,target=requirements.txt \
-    python -m pip install -r requirements.txt --disable-pip-version-check --no-warn-script-location
+    python -m pip install -r requirements.txt --disable-pip-version-check --no-warn-script-location && \
+    python -m pip install waitress --disable-pip-version-check --no-warn-script-location
 
 USER appuser
 
@@ -48,6 +49,6 @@ COPY --from=web-builder /frontend/dist ./dist
 ENV FLASK_APP=main.py
 ENV FLASK_ENV=production
 
-EXPOSE 5000
+EXPOSE 8080
 
-CMD ["python", "main.py"]
+CMD ["waitress-serve", "--call", "app:create_app"]
