@@ -49,6 +49,21 @@ COPY --from=web-builder /frontend/dist ./dist
 ENV FLASK_APP=main.py
 ENV FLASK_ENV=production
 
+ARG BUILD_DATE
+ARG VCS_REF
+ARG VCS_URL
+ARG VERSION
+
+LABEL org.opencontainers.image.created=$BUILD_DATE \
+      org.opencontainers.image.authors="Julien W <cefadrom1@gmail.com>" \
+      org.opencontainers.image.source=$VCS_URL \
+      org.opencontainers.image.version=$VERSION \
+      org.opencontainers.image.revision=$VCS_REF \
+      org.opencontainers.image.title="Deliver'it" \
+      org.opencontainers.image.description="A web application to help you manage your VRP deliveries and routes in France." \
+      org.opencontainers.image.base.name="python" \
+      org.opencontainers.image.base.version="${PYTHON_VERSION}-slim"
+
 EXPOSE 8080
 
 CMD ["waitress-serve", "--call", "app:create_app"]
