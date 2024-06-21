@@ -138,6 +138,7 @@ export async function drawVrpSolution(solution: VrpTravelCity[][]) {
 
         mapFeatures.straightLines.push(straightLines);
         mapFeatures.packagesMarkers.push(packagesMarkers);
+        mapFeatures.colors.push(color);
     }
 
     mapFeaturesStore.set(mapFeatures);
