@@ -1,6 +1,6 @@
 <script lang="ts">
     import { mapStore } from '$resources/stores.ts';
-    import { DEFAULT_POSITION, DEFAULT_ZOOM } from '$resources/defaults.ts';
+    import { DEFAULT_BOUNDS } from '$resources/defaults.ts';
     import { TruckModel } from '$models/truck-model.ts';
     import { fade } from 'svelte/transition';
 
@@ -25,14 +25,12 @@
 
         // Reset view
         $mapStore.setMinZoom(1);
-        $mapStore.flyTo({
-            ...DEFAULT_POSITION,
+        $mapStore.fitBounds(DEFAULT_BOUNDS, {
             duration: 1000,
         });
         await new Promise(resolve => setTimeout(resolve, 1050));
 
         // Reset variables
-        $mapStore.setMinZoom(DEFAULT_ZOOM);
         cameraMoving = false;
     }
 </script>
