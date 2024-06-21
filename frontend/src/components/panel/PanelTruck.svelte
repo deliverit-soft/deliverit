@@ -33,8 +33,6 @@
     });
 
     function handlePathProgress(ev: CustomEvent<PathProgressEventDetail>) {
-        if (index === 0)
-            console.log(ev);
         progress = ev.detail.progress;
     }
 
