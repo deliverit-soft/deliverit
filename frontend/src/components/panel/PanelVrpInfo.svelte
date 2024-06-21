@@ -6,7 +6,6 @@
     import { getRoute } from '$helpers/geo.ts';
     import { drawLine, removeLine } from '$helpers/draw.ts';
     import { tweened } from 'svelte/motion';
-    import { cubicInOut } from 'svelte/easing';
     import { TruckModel } from '$models/truck-model.ts';
     import type { Feature, Position } from 'geojson';
     // @ts-ignore
@@ -15,8 +14,7 @@
 
 
     let calculateRoadsProgress = tweened(0, {
-        duration: 1000,
-        easing: cubicInOut,
+        duration: 300,
     });
 
     let trucks: TruckModel[] = [];
@@ -29,7 +27,7 @@
 
     async function handleRoadsCalculation() {
         $calculateRoadsProgress += 0.001;
-        const pathsCount = $mapFeatures.straightLines.flat(1).length;
+        const totalPathsCount = $mapFeatures.straightLines.flat(1).length;
 
         for (let i = 0; i < $mapFeatures.straightLines.length; i++) {
             const truckLines = $mapFeatures.straightLines[i]!;
@@ -38,7 +36,6 @@
 
             const realPath: Feature<LineString, GeoJSONObject>[] = [];
             for (const segment of truckLines) {
-                $calculateRoadsProgress = ($mapFeatures.realPaths.flat(1).length / pathsCount) * 100;
                 try {
                     const route = await getRoute(segment.geometry.coordinates);
                     removeLine(segment);
@@ -47,6 +44,8 @@
                 } catch (error) {
                     console.error('Route plotting error', error, segment);
                 }
+                const currentPathsCount = $mapFeatures.realPaths.flat(1).length + realPath.length;
+                $calculateRoadsProgress = (currentPathsCount / totalPathsCount) * 100;
             }
             $mapFeatures.realPaths.push(realPath);
 
