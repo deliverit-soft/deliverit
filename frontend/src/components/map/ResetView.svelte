@@ -3,16 +3,43 @@
     import { DEFAULT_BOUNDS } from '$resources/defaults.ts';
     import { TruckModel } from '$models/truck-model.ts';
     import { fade } from 'svelte/transition';
+    import { onDestroy, onMount } from 'svelte';
 
     let isDefaultPosition = true;
     let cameraMoving = false;
 
-    $: $mapStore?.on('move', () => {
-        if (cameraMoving)
+    const getWindowSize = () => `${window.innerWidth}x${window.innerHeight}`;
+
+    let windowSize: string;
+    onMount(() => {
+        windowSize = getWindowSize();
+    });
+
+    onDestroy(() => {
+        $mapStore?.off('move', handleMapMove);
+        $mapStore?.off('resize', handleMapResize);
+    });
+
+    $: $mapStore?.on('move', handleMapMove);
+
+    function handleMapMove() {
+        if (cameraMoving || !isDefaultPosition || windowSize !== getWindowSize())
             return;
 
         isDefaultPosition = false;
-    });
+    }
+
+    $: $mapStore?.on('resize', handleMapResize);
+
+    function handleMapResize() {
+        if (!isDefaultPosition)
+            return;
+
+        $mapStore.fitBounds(DEFAULT_BOUNDS, {
+            animate: false,
+        });
+        windowSize = getWindowSize();
+    }
 
     async function resetView() {
         if (cameraMoving)
@@ -35,6 +62,7 @@
     }
 </script>
 
+
 <style>
     button {
         position: absolute;
@@ -56,6 +84,7 @@
         background-color: #e9ecef;
     }
 </style>
+
 
 {#if !isDefaultPosition}
     <button on:click={resetView} transition:fade={{duration: 300}}>
