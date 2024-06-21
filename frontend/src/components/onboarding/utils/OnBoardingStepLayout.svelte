@@ -1,14 +1,20 @@
 <script lang="ts">
     import { createEventDispatcher } from 'svelte';
+    import { ChevronLeft, Icon } from 'svelte-hero-icons';
 
     export let nextDisabled: boolean = false;
     export let nextHidden: boolean = false;
     export let title: string = 'Onboarding step';
+    export let allowBack: boolean = false;
 
     const dispatch = createEventDispatcher();
 
     function handleNext() {
         dispatch('next');
+    }
+
+    function handleBack() {
+        dispatch('back');
     }
 </script>
 
@@ -21,6 +27,21 @@
         display: flex;
         flex-direction: column;
         gap: 2rem;
+    }
+
+    .onboarding-title {
+        display: flex;
+        align-items: center;
+        justify-content: start;
+        gap: 1rem;
+    }
+
+    .onboarding-back {
+        cursor: pointer;
+        height: 2rem;
+        width: 2rem;
+        border: none;
+        background: none;
     }
 
     h2 {
@@ -58,6 +79,11 @@
 
 <div class="onboarding-container">
     <div class="onboarding-title">
+        {#if allowBack}
+            <button class="onboarding-back" on:click={handleBack}>
+                <Icon src={ChevronLeft} size="2rem"/>
+            </button>
+        {/if}
         <slot name="title">
             <h2>{title}</h2>
         </slot>

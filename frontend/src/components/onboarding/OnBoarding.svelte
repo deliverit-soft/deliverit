@@ -39,6 +39,10 @@
         }
     }
 
+    function handleBack() {
+        step = 'method';
+    }
+
     function handleTrucksCreated() {
         step = 'create-packages';
     }
@@ -96,7 +100,7 @@
             <p>Import</p>
         {/if}
         {#if step === 'create-trucks'}
-            <OnBoardingInstanceCreateTrucks on:next={handleTrucksCreated}/>
+            <OnBoardingInstanceCreateTrucks on:next={handleTrucksCreated} on:back={handleBack}/>
         {/if}
         {#if step === 'bin-packing'}
             <OnBoardingBinPacking on:next={handleBinPacking}/>
@@ -120,7 +124,7 @@
                     on:next={handleCitiesSet}/>
         {/if}
         {#if step === 'history'}
-            <OnBoardingHistory on:next={handleDone}/>
+            <OnBoardingHistory on:next={handleDone} on:back={handleBack}/>
         {/if}
     </div>
 </div>
