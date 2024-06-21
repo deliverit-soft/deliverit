@@ -13,3 +13,5 @@ export const PATHS_PACKAGES_COUNT = 5;
 
 export const TRUCK_HIGH_SPEED = 5000;
 export const TRUCK_LOW_SPEED = 100;
+
+export const MAP_DRAW_DURATION = 2500;

@@ -3,7 +3,7 @@ import type { Feature, Position } from 'geojson';
 import mapboxgl, { type LngLatLike } from 'mapbox-gl';
 import type { VrpTravelCity } from '$models/vrp.ts';
 import { chunkifyPath, wait } from '$helpers/utils.ts';
-import { PATHS_PACKAGES_COUNT } from '$resources/defaults.ts';
+import { MAP_DRAW_DURATION, PATHS_PACKAGES_COUNT } from '$resources/defaults.ts';
 import { DEFAULT_MAP_FEATURES } from '$models/map-features.ts';
 
 export function drawLine(
@@ -85,22 +85,40 @@ export function* colorGenerator(nuances: number) {
 }
 
 
+interface VrpTruckFeatures {
+    color: string;
+    chunks: Position[][];
+    packages: VrpTravelCity[];
+}
+
+
 export async function drawVrpSolution(solution: VrpTravelCity[][]) {
     // Draw paths
     const colorGen = colorGenerator(solution.length);
     const mapFeatures = getMapFeatures();
     mapFeaturesStore.set(DEFAULT_MAP_FEATURES);
 
-    for (const truckRoute of solution) {
+    const vrpFeatures: VrpTruckFeatures[] = [];
+    let drawCalls = 0;
+
+    for (const truckStopCities of solution) {
         const color = colorGen.next().value!;
-        const path = truckRoute.map(value => ([ value.lon, value.lat ]) as Position);
+        const path = truckStopCities.map(value => ([ value.lon, value.lat ]) as Position);
         const chunkedPath = chunkifyPath(path, PATHS_PACKAGES_COUNT);
 
-        mapFeatures.colors.push(color);
+        vrpFeatures.push({
+            color,
+            chunks: chunkedPath,
+            packages: truckStopCities,
+        });
+        drawCalls += chunkedPath.length + truckStopCities.length;
+    }
+
+    for (const { color, chunks, packages } of vrpFeatures) {
         const straightLines: Feature[] = [];
         const packagesMarkers: mapboxgl.Marker[] = [];
 
-        for (const chunk of chunkedPath) {
+        for (const chunk of chunks) {
             const line = drawLine(
                 chunk,
                 {
@@ -109,13 +127,13 @@ export async function drawVrpSolution(solution: VrpTravelCity[][]) {
                 },
             );
             straightLines.push(line);
-            await wait(50);
+            await wait(MAP_DRAW_DURATION / drawCalls);
         }
 
-        for (const city of truckRoute) {
+        for (const city of packages) {
             const marker = placeMarker([ city.lon, city.lat ], 'archive', color);
             packagesMarkers.push(marker);
-            await wait(20);
+            await wait(MAP_DRAW_DURATION / drawCalls);
         }
 
         mapFeatures.straightLines.push(straightLines);
