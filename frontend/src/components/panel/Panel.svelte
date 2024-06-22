@@ -4,7 +4,7 @@
     import PanelVrpLoading from '$components/panel/PanelVrpLoading.svelte';
     import PanelVrpInfo from '$components/panel/PanelVrpInfo.svelte';
 
-    export let vrpStep: 'onboarding' | 'vrp' | 'done';
+    export let vrpStep: 'onboarding' | 'vrp' | 'drawing' | 'done';
 </script>
 
 <style>
@@ -27,7 +27,7 @@
 
     {#if vrpStep === 'vrp'}
         <PanelVrpLoading/>
-    {:else if vrpStep === 'done'}
-        <PanelVrpInfo/>
+    {:else if vrpStep === 'drawing' || vrpStep === 'done'}
+        <PanelVrpInfo drawing={vrpStep === 'drawing'}/>
     {/if}
 </aside>

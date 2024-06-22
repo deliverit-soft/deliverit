@@ -12,6 +12,7 @@
     import type { GeoJSONObject, LineString } from '@turf/turf';
     import PanelTruck from '$components/panel/PanelTruck.svelte';
 
+    export let drawing: boolean;
 
     let calculateRoadsProgress = tweened(0, {
         duration: 300,
@@ -57,7 +58,7 @@
             await truck.load();
             truck.object.setCoords(realPath[0]!.geometry.coordinates[0]);
             truck.spawn();
-            trucks = [...trucks, truck];
+            trucks = [ ...trucks, truck ];
         }
 
         $mapFeatures.straightLines = [];
@@ -119,11 +120,11 @@
     Total distance: {$vrpResults.bestCost.toFixed(0)} km
 </div>
 
-{#if $calculateRoadsProgress === 0}
-    <button on:click={handleRoadsCalculation}>
+{#if $calculateRoadsProgress === 0 && !drawing}
+    <button on:click={handleRoadsCalculation} in:fade={{ duration: 200 }}>
         Click to calculate real roads
     </button>
-{:else}
+{:else if !drawing}
     <progress value={$calculateRoadsProgress} max="100" class:hidden={$calculateRoadsProgress === 100}/>
     <div class="trucks-list">
         {#each trucks as truck, index (truck.id)}
