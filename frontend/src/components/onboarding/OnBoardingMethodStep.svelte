@@ -35,6 +35,12 @@
         transition: all .2s;
     }
 
+    .onboarding-choice span {
+        display: flex;
+        height: 2.625rem;
+        align-items: center;
+    }
+
     .onboarding-choice:hover {
         box-shadow: var(--shadow-md-theme);
         transform: scale(1.05);
@@ -42,18 +48,18 @@
 </style>
 
 <div class="choices-container">
-    <button class="onboarding-choice" on:click={() => handleChoice("import")}>
-        Import instance
-        <Icon src={ArrowUpTray} size="2rem"/>
-    </button>
+<!--    <button class="onboarding-choice" on:click={() => handleChoice("import")}>-->
+<!--        Import instance-->
+<!--        <Icon src={ArrowUpTray} size="2rem"/>-->
+<!--    </button>-->
 
     <button class="onboarding-choice" on:click={() => handleChoice("create")}>
-        Create new instance
+        <span>Create new instance</span>
         <Icon src={GlobeEuropeAfrica} size="2rem"/>
     </button>
 
     <button class="onboarding-choice" on:click={() => handleChoice("history")}>
-        Instances history
+        <span>Instances history</span>
         <Icon src={ArchiveBoxArrowDown} size="2rem"/>
     </button>
 </div>
