@@ -151,5 +151,9 @@ export async function drawVrpSolution(solution: VrpTravelCity[][]) {
                 acc.push(city!);
             return acc;
         }, new Array<VrpTravelCity>())
-        .forEach(city => placeMarker([ city.lon, city.lat ]));
+        .forEach((city, index) => placeMarker(
+            [ city.lon, city.lat ],
+            null,
+            vrpFeatures[index]!.color),
+        );
 }
