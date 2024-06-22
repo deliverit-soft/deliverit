@@ -1,9 +1,9 @@
 <script lang="ts">
-    import mapboxgl from 'mapbox-gl';
+    import mapboxgl, { type LngLatLike } from 'mapbox-gl';
     import 'mapbox-gl/dist/mapbox-gl.css';
     import { onDestroy, onMount } from 'svelte';
     import { mapStore, threebox } from '$resources/stores.ts';
-    import { DEFAULT_POSITION, DEFAULT_ZOOM } from '$resources/defaults.ts';
+    import { DEFAULT_BOUNDS, MAP_BOUNDS } from '$resources/defaults.ts';
     import { Threebox } from 'threebox-plugin';
 
     const { PUBLIC_MAPBOX_TOKEN, PUBLIC_MAPBOX_STYLES } = import.meta.env;
@@ -14,10 +14,11 @@
         $mapStore = new mapboxgl.Map({
             container: mapContainer,
             style: PUBLIC_MAPBOX_STYLES,
-            minZoom: DEFAULT_ZOOM,
-            maxBounds: new mapboxgl.LngLatBounds([-7, 42], [10, 52]),
+            maxBounds: new mapboxgl.LngLatBounds(MAP_BOUNDS as [ LngLatLike, LngLatLike ]),
             antialias: true,
-            ...DEFAULT_POSITION,
+        });
+        $mapStore.fitBounds(DEFAULT_BOUNDS, {
+            animate: false,
         });
 
         await new Promise(resolve => $mapStore.once('load', resolve));

@@ -58,7 +58,7 @@
 </style>
 
 
-<OnBoardingStepLayout title="Instances history" nextHidden>
+<OnBoardingStepLayout allowBack on:back title="Instances history" nextHidden>
     <div class="history-container">
         {#each history as element}
             <button class="history-element" on:click={() => handleInstanceClick(element)}>

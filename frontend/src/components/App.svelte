@@ -8,7 +8,7 @@
     import { drawVrpSolution } from '$helpers/draw.ts';
     import { ArchiveBox, Icon, Truck } from 'svelte-hero-icons';
 
-    let vrpStep: 'onboarding' | 'vrp' | 'done' = 'onboarding';
+    let vrpStep: 'onboarding' | 'vrp' | 'drawing' | 'done' = 'onboarding';
 
     async function handleOnBoardingDone() {
         vrpStep = 'vrp';
@@ -18,8 +18,9 @@
             $citiesToTour
         );
         $vrpResults = result;
-        vrpStep = 'done';
+        vrpStep = 'drawing';
         await drawVrpSolution(result.bestSolution);
+        vrpStep = 'done';
     }
 </script>
 

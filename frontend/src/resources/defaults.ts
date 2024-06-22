@@ -1,18 +1,17 @@
-import type { LngLatLike } from 'mapbox-gl';
+export const DEFAULT_BOUNDS: [ [ number, number ], [ number, number ] ] = [
+    [ -5, 41.5 ],
+    [ 8, 51.5 ],
+];
 
-export const DEFAULT_ZOOM = 5.75;
-export const DEFAULT_CENTER: LngLatLike = [ 1.784164, 46.728015 ];
-export const DEFAULT_BEARING = 0;
-export const DEFAULT_PITCH = 0;
-
-export const DEFAULT_POSITION = {
-    center: DEFAULT_CENTER,
-    zoom: DEFAULT_ZOOM,
-    bearing: DEFAULT_BEARING,
-    pitch: DEFAULT_PITCH,
-};
+const BOUNDS_PADDING = 3;
+export const MAP_BOUNDS = [
+    [ DEFAULT_BOUNDS[0][0] - BOUNDS_PADDING, DEFAULT_BOUNDS[0][1] - BOUNDS_PADDING ],
+    [ DEFAULT_BOUNDS[1][0] + BOUNDS_PADDING, DEFAULT_BOUNDS[1][1] + BOUNDS_PADDING ],
+];
 
 export const PATHS_PACKAGES_COUNT = 5;
 
 export const TRUCK_HIGH_SPEED = 5000;
 export const TRUCK_LOW_SPEED = 100;
+
+export const MAP_DRAW_DURATION = 2500;

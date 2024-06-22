@@ -30,6 +30,7 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
+        flex: 1;
     }
 
     h2 {
@@ -66,7 +67,7 @@
 </style>
 
 
-<OnBoardingStepLayout on:next nextDisabled={$instancesStore.length === 0}>
+<OnBoardingStepLayout on:next on:back allowBack nextDisabled={$instancesStore.length === 0}>
     <div class="create-header" slot="title">
         <h2>
             Truck fleet

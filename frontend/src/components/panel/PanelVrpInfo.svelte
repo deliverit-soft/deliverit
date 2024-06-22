@@ -6,17 +6,16 @@
     import { getRoute } from '$helpers/geo.ts';
     import { drawLine, removeLine } from '$helpers/draw.ts';
     import { tweened } from 'svelte/motion';
-    import { cubicInOut } from 'svelte/easing';
     import { TruckModel } from '$models/truck-model.ts';
     import type { Feature, Position } from 'geojson';
     // @ts-ignore
     import type { GeoJSONObject, LineString } from '@turf/turf';
     import PanelTruck from '$components/panel/PanelTruck.svelte';
 
+    export let drawing: boolean;
 
     let calculateRoadsProgress = tweened(0, {
-        duration: 1000,
-        easing: cubicInOut,
+        duration: 300,
     });
 
     let trucks: TruckModel[] = [];
@@ -29,7 +28,7 @@
 
     async function handleRoadsCalculation() {
         $calculateRoadsProgress += 0.001;
-        const pathsCount = $mapFeatures.straightLines.flat(1).length;
+        const totalPathsCount = $mapFeatures.straightLines.flat(1).length;
 
         for (let i = 0; i < $mapFeatures.straightLines.length; i++) {
             const truckLines = $mapFeatures.straightLines[i]!;
@@ -38,7 +37,6 @@
 
             const realPath: Feature<LineString, GeoJSONObject>[] = [];
             for (const segment of truckLines) {
-                $calculateRoadsProgress = ($mapFeatures.realPaths.flat(1).length / pathsCount) * 100;
                 try {
                     const route = await getRoute(segment.geometry.coordinates);
                     removeLine(segment);
@@ -47,6 +45,8 @@
                 } catch (error) {
                     console.error('Route plotting error', error, segment);
                 }
+                const currentPathsCount = $mapFeatures.realPaths.flat(1).length + realPath.length;
+                $calculateRoadsProgress = (currentPathsCount / totalPathsCount) * 100;
             }
             $mapFeatures.realPaths.push(realPath);
 
@@ -58,7 +58,7 @@
             await truck.load();
             truck.object.setCoords(realPath[0]!.geometry.coordinates[0]);
             truck.spawn();
-            trucks = [...trucks, truck];
+            trucks = [ ...trucks, truck ];
         }
 
         $mapFeatures.straightLines = [];
@@ -95,7 +95,12 @@
 
     progress {
         width: 100%;
-        margin-top: 1rem;
+        margin: 1rem 0;
+        transition: height 0.3s ease-in-out;
+    }
+
+    progress.hidden {
+        height: 0;
     }
 
     .trucks-list {
@@ -115,12 +120,12 @@
     Total distance: {$vrpResults.bestCost.toFixed(0)} km
 </div>
 
-{#if $calculateRoadsProgress === 0}
-    <button on:click={handleRoadsCalculation}>
+{#if $calculateRoadsProgress === 0 && !drawing}
+    <button on:click={handleRoadsCalculation} in:fade={{ duration: 200 }}>
         Click to calculate real roads
     </button>
-{:else}
-    <progress value={$calculateRoadsProgress} max="100"/>
+{:else if !drawing}
+    <progress value={$calculateRoadsProgress} max="100" class:hidden={$calculateRoadsProgress === 100}/>
     <div class="trucks-list">
         {#each trucks as truck, index (truck.id)}
             <PanelTruck {truck} path={getTruckPath(index)} {index} truckColor={getTruckColor(index)}/>
