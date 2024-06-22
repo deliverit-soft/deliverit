@@ -59,7 +59,7 @@
         padding: 1rem;
         box-shadow: var(--shadow-md);
         border-radius: 0.5rem;
-        margin: 1rem 0;
+        margin-bottom: 1rem;
     }
 
     .truck-header {

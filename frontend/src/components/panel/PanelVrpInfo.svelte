@@ -94,7 +94,12 @@
 
     progress {
         width: 100%;
-        margin-top: 1rem;
+        margin: 1rem 0;
+        transition: height 0.3s ease-in-out;
+    }
+
+    progress.hidden {
+        height: 0;
     }
 
     .trucks-list {
@@ -119,7 +124,7 @@
         Click to calculate real roads
     </button>
 {:else}
-    <progress value={$calculateRoadsProgress} max="100"/>
+    <progress value={$calculateRoadsProgress} max="100" class:hidden={$calculateRoadsProgress === 100}/>
     <div class="trucks-list">
         {#each trucks as truck, index (truck.id)}
             <PanelTruck {truck} path={getTruckPath(index)} {index} truckColor={getTruckColor(index)}/>
